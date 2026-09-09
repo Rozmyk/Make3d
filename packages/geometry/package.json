@@ -1,0 +1,18 @@
+{
+  "name": "@make3d/geometry",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./organizer": "./src/organizer.ts",
+    "./stl": "./src/stl.ts"
+  },
+  "scripts": { "typecheck": "tsc --noEmit", "test": "vitest run", "lint": "eslint src" },
+  "dependencies": {
+    "@make3d/types": "workspace:*",
+    "@make3d/validation": "workspace:*",
+    "manifold-3d": "^3.3.1"
+  },
+  "devDependencies": { "vitest": "^3.2.0" }
+}

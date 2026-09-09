@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: make3d
+      POSTGRES_USER: make3d
+      POSTGRES_PASSWORD: make3d
+    ports:
+      - "5432:5432"
+    volumes:
+      - make3d_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U make3d -d make3d"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  make3d_postgres:

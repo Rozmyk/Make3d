@@ -1,0 +1,10 @@
+{
+  "name": "@make3d/validation",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": { "typecheck": "tsc --noEmit", "test": "vitest run", "lint": "eslint src" },
+  "dependencies": { "@make3d/types": "workspace:*", "zod": "^3.24.0" },
+  "devDependencies": { "vitest": "^3.2.0" }
+}
