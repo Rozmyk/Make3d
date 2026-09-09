@@ -1,4 +1,4 @@
-export type GeneratorType = "organizer";
+export type GeneratorType = "organizer" | "phone-stand" | "cable-guide";
 
 export interface OrganizerParams {
   width: number;
@@ -11,6 +11,24 @@ export interface OrganizerParams {
   rows: number;
   dividerThickness: number;
   roundedInside: boolean;
+}
+
+export interface PhoneStandParams {
+  width: number;
+  depth: number;
+  height: number;
+  baseThickness: number;
+  backThickness: number;
+  lipHeight: number;
+  lipDepth: number;
+}
+
+export interface CableGuideParams {
+  width: number;
+  depth: number;
+  height: number;
+  wallThickness: number;
+  bottomThickness: number;
 }
 
 export interface MeshData {

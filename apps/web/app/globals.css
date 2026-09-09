@@ -339,6 +339,147 @@ input:focus-visible {
   text-transform: uppercase;
 }
 
+.generatorHome {
+  min-height: 100svh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  background: var(--color-paper);
+}
+
+.pickerHeader,
+.pickerFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-4);
+  border-color: var(--color-rule);
+}
+
+.pickerHeader { border-bottom: 1px solid var(--color-rule); }
+.pickerFooter {
+  border-top: 1px solid var(--color-rule);
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+
+.pickerMeta {
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  text-align: right;
+}
+
+.pickerContent {
+  width: min(100%, 72rem);
+  align-self: center;
+  padding: var(--space-7) var(--space-4);
+  margin-inline: auto;
+}
+
+.pickerKicker {
+  margin: 0 0 var(--space-3);
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+}
+
+.pickerContent h1 {
+  max-width: 18ch;
+  min-width: 0;
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3.75rem);
+  font-weight: 700;
+  letter-spacing: -0.055em;
+  line-height: 1.04;
+  overflow-wrap: anywhere;
+}
+
+.pickerLead {
+  max-width: 58ch;
+  margin: var(--space-4) 0 0;
+  color: var(--color-muted);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.generatorGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin-top: var(--space-7);
+  border-top: 1px solid var(--color-rule);
+}
+
+.generatorCard {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-5) 0;
+  border: 0;
+  border-bottom: 1px solid var(--color-rule);
+  background: transparent;
+  color: var(--color-muted);
+  cursor: pointer;
+  text-align: left;
+  transition: color var(--dur-short) var(--ease-out), background-color var(--dur-short) var(--ease-out);
+}
+
+.generatorCard strong {
+  color: var(--color-ink);
+  font-size: 1.3rem;
+  letter-spacing: -0.035em;
+}
+
+.generatorCard > span:not(.generatorDetail) {
+  grid-column: 1;
+  max-width: 38ch;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.generatorDetail {
+  grid-column: 1;
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+}
+
+.generatorCard i {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  align-self: center;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  font-style: normal;
+  white-space: nowrap;
+}
+
+.generatorCard:hover,
+.generatorCard:focus-visible { color: var(--color-ink); }
+.generatorCard:hover strong,
+.generatorCard:focus-visible strong,
+.generatorCard:hover i,
+.generatorCard:focus-visible i { color: var(--color-accent); }
+.generatorCard:active { background: var(--color-surface); }
+
+@media (min-width: 48rem) {
+  .pickerHeader,
+  .pickerFooter { padding-inline: var(--space-6); }
+  .pickerContent { padding-inline: var(--space-6); }
+  .generatorGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .generatorCard {
+    min-height: 16rem;
+    padding: var(--space-5);
+    border-right: 1px solid var(--color-rule);
+  }
+  .generatorCard:last-child { border-right: 0; }
+}
+
 @media (max-width: 39.99rem) {
   .status { display: none; }
   .fieldList { grid-template-columns: repeat(2, minmax(0, 1fr)); }

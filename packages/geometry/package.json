@@ -6,6 +6,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./organizer": "./src/organizer.ts",
+    "./basic": "./src/basic.ts",
     "./stl": "./src/stl.ts"
   },
   "scripts": { "typecheck": "tsc --noEmit", "test": "vitest run", "lint": "eslint src" },

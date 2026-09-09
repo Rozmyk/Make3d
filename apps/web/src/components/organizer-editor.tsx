@@ -55,7 +55,7 @@ export function OrganizerEditor() {
     const timeout = window.setTimeout(() => {
       const id = latestRequest.current + 1;
       latestRequest.current = id;
-      worker.current?.postMessage({ id, params: parsed.data });
+      worker.current?.postMessage({ id, type: "organizer", params: parsed.data });
     }, 120);
     return () => window.clearTimeout(timeout);
   }, [params]);

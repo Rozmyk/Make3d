@@ -1,5 +1,5 @@
-import { OrganizerEditor } from "../src/components/organizer-editor";
+import { GeneratorHome } from "../src/components/generator-home";
 
 export default function Home() {
-  return <OrganizerEditor />;
+  return <GeneratorHome />;
 }
