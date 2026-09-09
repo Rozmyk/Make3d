@@ -3,11 +3,21 @@
 import { Grid, OrbitControls } from "@react-three/drei";
 import { Canvas, useThree } from "@react-three/fiber";
 import type { GeneratedModel } from "@make3d/types";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import type { OrbitControls as OrbitControlsType } from "three-stdlib";
 
-function Mesh({ model, wireframe }: { model: GeneratedModel; wireframe: boolean }) {
+function readColorToken(name: string): THREE.Color {
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+  if (!context) return new THREE.Color();
+  context.fillStyle = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  context.fillRect(0, 0, 1, 1);
+  const [red, green, blue] = context.getImageData(0, 0, 1, 1).data;
+  return new THREE.Color(red / 255, green / 255, blue / 255);
+}
+
+function Mesh({ model, wireframe, color }: { model: GeneratedModel; wireframe: boolean; color: THREE.Color }) {
   const geometry = useMemo(() => {
     const source = model.mesh.positions;
     const converted = new Float32Array(source.length);
@@ -19,7 +29,7 @@ function Mesh({ model, wireframe }: { model: GeneratedModel; wireframe: boolean 
     return next;
   }, [model]);
   useEffect(() => () => geometry.dispose(), [geometry]);
-  return <mesh geometry={geometry} castShadow receiveShadow><meshStandardMaterial color="#dce9ff" roughness={0.48} metalness={0.08} wireframe={wireframe} /></mesh>;
+  return <mesh geometry={geometry}><meshStandardMaterial color={color} roughness={0.82} metalness={0} flatShading={true} wireframe={wireframe} /></mesh>;
 }
 
 function CameraFit({ model, resetToken }: { model: GeneratedModel; resetToken: number }) {
@@ -35,5 +45,10 @@ function CameraFit({ model, resetToken }: { model: GeneratedModel; resetToken: n
 }
 
 export function ModelViewport({ model, wireframe, resetToken }: { model?: GeneratedModel; wireframe: boolean; resetToken: number }) {
-  return <div className="canvasWrap"><Canvas shadows camera={{ position: [120, 100, 120], fov: 38 }}><color attach="background" args={["#f7faff"]} /><ambientLight intensity={1.3} /><directionalLight position={[100, 160, 80]} intensity={2.2} castShadow /><Grid args={[400, 400]} cellSize={10} cellThickness={0.6} sectionSize={50} sectionThickness={1.1} cellColor="#dce4f2" sectionColor="#b7c7de" fadeDistance={450} /><axesHelper args={[30]} />{model ? <><Mesh model={model} wireframe={wireframe} /><CameraFit model={model} resetToken={resetToken} /></> : null}</Canvas></div>;
+  const [colors, setColors] = useState<{ canvas: THREE.Color; model: THREE.Color; grid: THREE.Color; gridStrong: THREE.Color } | null>(null);
+  useEffect(() => {
+    setColors({ canvas: readColorToken("--color-canvas"), model: readColorToken("--color-model"), grid: readColorToken("--color-grid"), gridStrong: readColorToken("--color-grid-strong") });
+  }, []);
+  if (!colors) return <div className="canvasWrap" />;
+  return <div className="canvasWrap"><Canvas camera={{ position: [120, 100, 120], fov: 38 }}><color attach="background" args={[colors.canvas]} /><ambientLight intensity={2.15} /><directionalLight position={[100, 160, 80]} intensity={0.7} /><directionalLight position={[-80, 70, -120]} intensity={0.35} /><Grid args={[400, 400]} cellSize={10} cellThickness={0.6} sectionSize={50} sectionThickness={1.1} cellColor={colors.grid} sectionColor={colors.gridStrong} fadeDistance={450} />{model ? <><Mesh model={model} wireframe={wireframe} color={colors.model} /><CameraFit model={model} resetToken={resetToken} /></> : null}</Canvas></div>;
 }

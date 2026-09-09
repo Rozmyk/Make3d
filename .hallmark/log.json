@@ -1,0 +1,23 @@
+[
+  {
+    "date": "2026-09-09",
+    "macrostructure": "Fixed Workbench",
+    "theme": "Night Workshop",
+    "enrichment": "none",
+    "brief": "Dark maker tool with a fixed-height viewport and scrollable parameter rail"
+  },
+  {
+    "date": "2026-09-09",
+    "macrostructure": "Split Studio",
+    "theme": "Coral",
+    "enrichment": "none",
+    "brief": "Friendly, non-generic Organizer editor redesign"
+  },
+  {
+    "date": "2026-09-09",
+    "macrostructure": "Split Studio",
+    "theme": "Mineral Blue",
+    "enrichment": "none",
+    "brief": "Larger type and practical form controls for a non-generic organizer editor"
+  }
+]

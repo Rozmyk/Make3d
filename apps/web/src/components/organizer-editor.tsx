@@ -7,13 +7,18 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ModelViewport } from "./model-viewport";
 
 type WorkerResponse = { id: number; model?: GeneratedModel; error?: string };
+type NumericField = { key: Exclude<keyof OrganizerParams, "roundedInside">; label: string; unit?: string; step: number };
 
-const fields: Array<{ key: Exclude<keyof OrganizerParams, "roundedInside">; label: string; unit?: string; step: number }> = [
-  { key: "width", label: "Width", unit: "mm", step: 1 }, { key: "depth", label: "Depth", unit: "mm", step: 1 },
-  { key: "height", label: "Height", unit: "mm", step: 1 }, { key: "wallThickness", label: "Wall thickness", unit: "mm", step: 0.1 },
-  { key: "bottomThickness", label: "Bottom thickness", unit: "mm", step: 0.1 }, { key: "cornerRadius", label: "Corner radius", unit: "mm", step: 0.5 },
-  { key: "columns", label: "Columns", step: 1 }, { key: "rows", label: "Rows", step: 1 },
-  { key: "dividerThickness", label: "Divider thickness", unit: "mm", step: 0.1 },
+const parameterGroups: Array<{ label: string; fields: NumericField[] }> = [
+  { label: "Overall size", fields: [
+    { key: "width", label: "Width", unit: "mm", step: 1 }, { key: "depth", label: "Depth", unit: "mm", step: 1 }, { key: "height", label: "Height", unit: "mm", step: 1 },
+  ] },
+  { label: "Build", fields: [
+    { key: "wallThickness", label: "Wall", unit: "mm", step: 0.1 }, { key: "bottomThickness", label: "Bottom", unit: "mm", step: 0.1 }, { key: "cornerRadius", label: "Outer corners", unit: "mm", step: 0.5 },
+  ] },
+  { label: "Compartments", fields: [
+    { key: "columns", label: "Across", step: 1 }, { key: "rows", label: "Down", step: 1 }, { key: "dividerThickness", label: "Divider", unit: "mm", step: 0.1 },
+  ] },
 ];
 
 export function OrganizerEditor() {
@@ -69,15 +74,15 @@ export function OrganizerEditor() {
   };
 
   return <main className="workbench">
-    <header className="topbar"><a className="brand" href="/">Make3D</a><span className="tag">Organizer generator</span><div className="topbarActions"><span className="status" aria-live="polite">{status}</span><button className="button primary" disabled={!model} onClick={download}>Export STL</button></div></header>
+    <header className="topbar"><a className="brand" href="/"><span>Make</span><b>3D</b></a><span className="productLabel">Organizer</span><div className="topbarActions"><span className="status" aria-live="polite">{status}</span><button className="button buttonExport" disabled={!model} onClick={download}>Export STL <span aria-hidden="true">↓</span></button></div></header>
     <section className="editor" aria-label="Organizer editor">
-      <aside className="parameters"><details className="parameterDetails" open><summary className="panelHeading"><span>Parameters</span><span className="unitLabel">millimetres</span></summary>
-        <div className="fieldList">{fields.map((field) => <label className="field" key={field.key}><span>{field.label}</span><div className="inputWrap"><input type="number" value={params[field.key]} step={field.step} onChange={(event) => update(field.key, Number(event.target.value))} /><em>{field.unit}</em></div></label>)}</div>
-        <label className="toggle"><input type="checkbox" checked={params.roundedInside} onChange={(event) => update("roundedInside", event.target.checked)} /><span>Rounded compartment corners</span></label>
-        {error ? <p className="error" role="alert">{error}</p> : null}</details>
+      <aside className="parameters"><div className="parameterDetails"><div className="panelHeading"><span>Model settings</span><span className="unitLabel">mm</span></div>
+        {parameterGroups.map((group) => <section className="parameterGroup" key={group.label}><h2>{group.label}</h2><div className="fieldList">{group.fields.map((field) => <label className="field" key={field.key}><span>{field.label}</span><div className="inputWrap"><input aria-label={field.label} type="number" value={params[field.key]} step={field.step} onChange={(event) => update(field.key, Number(event.target.value))} /><span>{field.unit}</span></div></label>)}</div></section>)}
+        <label className="toggle"><input type="checkbox" checked={params.roundedInside} onChange={(event) => update("roundedInside", event.target.checked)} /><span>Round inside corners</span></label>
+        {error ? <p className="error" role="alert">{error}</p> : <p className="formHint">Changes update the model automatically.</p>}</div>
       </aside>
-      <div className="viewerPanel"><div className="viewerToolbar"><span>3D view</span><div className="viewerActions"><button className="reset" onClick={() => setResetView((value) => value + 1)}>Reset view</button><label className="wireframe"><input type="checkbox" checked={wireframe} onChange={(event) => setWireframe(event.target.checked)} /> Wireframe</label></div></div><ModelViewport model={model} wireframe={wireframe} resetToken={resetView} /></div>
+      <div className="viewerPanel"><div className="viewerToolbar"><div><span className="viewLabel">Live preview</span><p>Drag to orbit · scroll to zoom</p></div><div className="viewerActions"><button className="reset" onClick={() => setResetView((value) => value + 1)}>Reset view</button><label className="wireframe"><input type="checkbox" checked={wireframe} onChange={(event) => setWireframe(event.target.checked)} /> Wireframe</label></div></div><ModelViewport model={model} wireframe={wireframe} resetToken={resetView} /></div>
     </section>
-    <footer className="inspector">{model ? <><span><b>Model</b> {model.metadata.boundingBox.width.toFixed(1)} × {model.metadata.boundingBox.depth.toFixed(1)} × {model.metadata.boundingBox.height.toFixed(1)} mm</span><span><b>Compartments</b> {model.metadata.compartmentCount}</span><span><b>Triangles</b> {model.metadata.triangleCount.toLocaleString()}</span><span><b>Volume</b> {(model.metadata.volumeMm3 / 1000).toFixed(1)} cm³</span></> : <span>Model preview will appear here.</span>}</footer>
+    <footer className="inspector">{model ? <><span><b>Size</b> {model.metadata.boundingBox.width.toFixed(1)} × {model.metadata.boundingBox.depth.toFixed(1)} × {model.metadata.boundingBox.height.toFixed(1)} mm</span><span><b>Compartments</b> {model.metadata.compartmentCount}</span><span><b>Material</b> {(model.metadata.volumeMm3 / 1000).toFixed(1)} cm³</span><span><b>Mesh</b> {model.metadata.triangleCount.toLocaleString()} triangles</span></> : <span>Preparing your model…</span>}</footer>
   </main>;
 }
