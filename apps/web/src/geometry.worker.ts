@@ -1,8 +1,8 @@
 import { createOrganizer } from "@make3d/geometry/organizer";
-import { createCableGuide, createPhoneStand } from "@make3d/geometry/basic";
-import type { CableGuideParams, GeneratorType, OrganizerParams, PhoneStandParams } from "@make3d/types";
+import { createCableDeskOrganizer, createCableGuide, createPhoneStand } from "@make3d/geometry/basic";
+import type { CableDeskOrganizerParams, CableGuideParams, GeneratorType, OrganizerParams, PhoneStandParams } from "@make3d/types";
 
-type Request = { id: number; type: GeneratorType; params: OrganizerParams | PhoneStandParams | CableGuideParams };
+type Request = { id: number; type: GeneratorType; params: OrganizerParams | PhoneStandParams | CableGuideParams | CableDeskOrganizerParams };
 
 const workerScope = self as unknown as {
   onmessage: ((event: MessageEvent<Request>) => void) | null;
@@ -15,7 +15,9 @@ workerScope.onmessage = async ({ data }: MessageEvent<Request>) => {
       ? await createOrganizer(data.params)
       : data.type === "phone-stand"
         ? await createPhoneStand(data.params)
-        : await createCableGuide(data.params);
+        : data.type === "cable-guide"
+          ? await createCableGuide(data.params)
+          : await createCableDeskOrganizer(data.params);
     workerScope.postMessage({ id: data.id, model }, [model.mesh.positions.buffer, model.mesh.indices.buffer]);
   } catch (error) {
     workerScope.postMessage({ id: data.id, error: error instanceof Error ? error.message : "Geometry generation failed." });

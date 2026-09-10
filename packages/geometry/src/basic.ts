@@ -1,5 +1,5 @@
-import type { CableGuideParams, GeneratedModel, MeshData, ModelMetadata, PhoneStandParams } from "@make3d/types";
-import { cableGuideParamsSchema, phoneStandParamsSchema } from "@make3d/validation";
+import type { CableDeskOrganizerParams, CableGuideParams, GeneratedModel, MeshData, ModelMetadata, PhoneStandParams } from "@make3d/types";
+import { cableDeskOrganizerParamsSchema, cableGuideParamsSchema, phoneStandParamsSchema } from "@make3d/validation";
 import createManifold, { type ManifoldToplevel } from "manifold-3d";
 import { GeometryGenerationError } from "./organizer";
 
@@ -78,5 +78,47 @@ export async function createCableGuide(input: unknown): Promise<GeneratedModel> 
     return buildModel(module.Manifold.union(parts), ["The open front lets you snap a cable into the guide."]);
   } finally {
     parts.forEach((part) => part.delete());
+  }
+}
+
+export async function createCableDeskOrganizer(input: unknown): Promise<GeneratedModel> {
+  const params: CableDeskOrganizerParams = cableDeskOrganizerParamsSchema.parse(input);
+  const module = await getManifold();
+  const wallThickness = Math.max(3, params.baseThickness * 0.75);
+  const mountDepth = Math.max(28, params.cableDiameter * 2.5);
+  const channelDepth = params.depth - mountDepth;
+  const channelBottom = params.baseThickness - params.backHeight;
+  const lipHeight = Math.max(8, Math.min(params.backHeight * 0.45, params.cableDiameter * 0.9));
+  const mountCenter = -params.depth / 2 + mountDepth / 2;
+  const backCenter = -params.depth / 2 + mountDepth - wallThickness / 2;
+  const channelCenter = mountDepth / 2;
+  const parts = [
+    // This plate sits against the underside of the desk. The channel hangs below it.
+    cuboid(module, params.length, mountDepth, params.baseThickness, 0, mountCenter),
+    cuboid(module, params.length, wallThickness, params.backHeight, 0, backCenter, params.baseThickness - params.backHeight / 2),
+    cuboid(module, params.length, channelDepth, params.baseThickness, 0, channelCenter, channelBottom + params.baseThickness / 2),
+    // A low retaining lip leaves a deliberate front opening: push a cable in and it snaps behind the lip.
+    cuboid(module, params.length, wallThickness, lipHeight, 0, params.depth / 2 - wallThickness / 2, channelBottom + lipHeight / 2),
+  ];
+  const screwHoles = params.mountStyle === "screws"
+    ? [-params.length * 0.36, params.length * 0.36].flatMap((x) => [-params.depth / 2 + mountDepth * 0.3, -params.depth / 2 + mountDepth * 0.7]
+      .map((y) => module.Manifold.cylinder(params.baseThickness + 0.04, 2.25, 2.25, 24).translate([x, y, -0.02])))
+    : [];
+  try {
+    const body = module.Manifold.union(parts);
+    try {
+      const result = screwHoles.length ? module.Manifold.difference([body, ...screwHoles]) : body;
+      return buildModel(result, [
+        params.mountStyle === "screws"
+          ? "Fasten the mounting plate to the underside of the desk with four screws."
+          : "Apply strong double-sided mounting tape to the flat mounting plate.",
+        "Press cables through the open front lip; it retains them while keeping them removable.",
+      ]);
+    } finally {
+      if (screwHoles.length) body.delete();
+    }
+  } finally {
+    parts.forEach((part) => part.delete());
+    screwHoles.forEach((hole) => hole.delete());
   }
 }

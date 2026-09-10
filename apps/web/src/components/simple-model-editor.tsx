@@ -13,7 +13,7 @@ export type SimpleModelSpec = {
   type: Exclude<GeneratorType, "organizer">;
   title: string;
   filename: string;
-  defaults: Record<string, number>;
+  defaults: Record<string, number | string>;
   schema: Schema;
   groups: Array<{ label: string; fields: Field[] }>;
 };

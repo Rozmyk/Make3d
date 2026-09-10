@@ -95,3 +95,24 @@ export const cableGuideParamsSchema = z.object({
   if (value.width <= value.wallThickness * 2) context.addIssue({ code: z.ZodIssueCode.custom, path: ["width"], message: "Width must leave room for the cable channel." });
   if (value.bottomThickness >= value.height) context.addIssue({ code: z.ZodIssueCode.custom, path: ["bottomThickness"], message: "Bottom thickness must be less than height." });
 });
+
+export const cableDeskOrganizerDefaults = {
+  length: 180,
+  depth: 110,
+  baseThickness: 5,
+  backHeight: 32,
+  cableDiameter: 12,
+  mountStyle: "screws",
+} as const;
+
+export const cableDeskOrganizerParamsSchema = z.object({
+  length: millimetres(100, 320),
+  depth: millimetres(70, 180),
+  baseThickness: millimetres(3, 10),
+  backHeight: millimetres(15, 70),
+  cableDiameter: millimetres(6, 20),
+  mountStyle: z.enum(["screws", "adhesive"]),
+}).superRefine((value, context) => {
+  if (value.cableDiameter >= value.depth / 2) context.addIssue({ code: z.ZodIssueCode.custom, path: ["cableDiameter"], message: "Cable diameter is too large for this channel depth." });
+  if (value.backHeight <= value.baseThickness) context.addIssue({ code: z.ZodIssueCode.custom, path: ["backHeight"], message: "Back height must exceed base thickness." });
+});

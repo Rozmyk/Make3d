@@ -1,12 +1,13 @@
 "use client";
 
 import { exportBinaryStl } from "@make3d/geometry/stl";
-import type { GeneratedModel, OrganizerParams } from "@make3d/types";
-import { organizerDefaults, organizerParamsSchema } from "@make3d/validation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import type { OrganizerParams } from "@make3d/types";
+import { organizerDefaults } from "@make3d/validation";
+import { useCallback, useState } from "react";
+import { useOrganizerModel } from "../hooks/use-organizer-model";
+import { organizerEditorInitialParams } from "../organizer-presets";
 import { ModelViewport } from "./model-viewport";
 
-type WorkerResponse = { id: number; model?: GeneratedModel; error?: string };
 type NumericField = { key: Exclude<keyof OrganizerParams, "roundedInside">; label: string; unit?: string; step: number };
 
 const parameterGroups: Array<{ label: string; fields: NumericField[] }> = [
@@ -21,44 +22,11 @@ const parameterGroups: Array<{ label: string; fields: NumericField[] }> = [
   ] },
 ];
 
-export function OrganizerEditor() {
-  const [params, setParams] = useState<OrganizerParams>(organizerDefaults);
-  const [model, setModel] = useState<GeneratedModel>();
-  const [status, setStatus] = useState("Preparing geometry…");
-  const [error, setError] = useState<string>();
+export function OrganizerEditor({ initialParams = organizerDefaults }: { initialParams?: OrganizerParams }) {
+  const [params, setParams] = useState<OrganizerParams>(() => organizerEditorInitialParams(initialParams));
   const [wireframe, setWireframe] = useState(false);
   const [resetView, setResetView] = useState(0);
-  const worker = useRef<Worker | null>(null);
-  const latestRequest = useRef(0);
-
-  useEffect(() => {
-    const instance = new Worker(new URL("../geometry.worker.ts", import.meta.url));
-    worker.current = instance;
-    instance.onmessage = ({ data }: MessageEvent<WorkerResponse>) => {
-      if (data.id !== latestRequest.current) return;
-      if (data.error) { setError(data.error); setStatus("Geometry error"); return; }
-      setModel(data.model); setError(undefined); setStatus("Geometry ready");
-    };
-    instance.onerror = (event) => {
-      if (latestRequest.current > 0) {
-        setError(event.message || "The geometry worker could not start.");
-        setStatus("Geometry error");
-      }
-    };
-    return () => instance.terminate();
-  }, []);
-
-  useEffect(() => {
-    const parsed = organizerParamsSchema.safeParse(params);
-    if (!parsed.success) { setError(parsed.error.issues[0]?.message ?? "Invalid parameters."); setStatus("Fix parameters"); return; }
-    setError(undefined); setStatus("Updating model…");
-    const timeout = window.setTimeout(() => {
-      const id = latestRequest.current + 1;
-      latestRequest.current = id;
-      worker.current?.postMessage({ id, type: "organizer", params: parsed.data });
-    }, 120);
-    return () => window.clearTimeout(timeout);
-  }, [params]);
+  const { model, status, error } = useOrganizerModel(params);
 
   const update = useCallback((key: keyof OrganizerParams, value: number | boolean) => {
     setParams((previous) => ({ ...previous, [key]: value }));

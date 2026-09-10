@@ -1,3 +1,3 @@
 export { createOrganizer, GeometryGenerationError } from "./organizer";
-export { createCableGuide, createPhoneStand } from "./basic";
+export { createCableDeskOrganizer, createCableGuide, createPhoneStand } from "./basic";
 export { exportBinaryStl } from "./stl";
