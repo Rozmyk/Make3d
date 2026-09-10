@@ -1,12 +1,19 @@
 "use client";
 
 import { cableDeskOrganizerDefaults, cableDeskOrganizerParamsSchema } from "@make3d/validation";
-import { useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { organizerPresets, type OrganizerPreset } from "../organizer-presets";
 import { OrganizerEditor } from "./organizer-editor";
 import { type SimpleModelSpec, SimpleModelEditor } from "./simple-model-editor";
 
 type HomeView = "categories" | "organizers" | "desk-accessories";
+const premiumEase = [0.16, 1, 0.3, 1] as const;
+
+function viewFromLocation(): HomeView {
+  const category = new URLSearchParams(window.location.search).get("category");
+  return category === "organizers" || category === "desk-accessories" ? category : "categories";
+}
 
 const cableDeskOrganizerScrew: SimpleModelSpec = {
   type: "cable-desk-organizer",
@@ -44,14 +51,36 @@ export function GeneratorHome() {
   const [view, setView] = useState<HomeView>("categories");
   const [selectedPreset, setSelectedPreset] = useState<OrganizerPreset>();
   const [selectedDeskOrganizer, setSelectedDeskOrganizer] = useState<SimpleModelSpec>();
+  const reduceMotion = useReducedMotion();
+  const enter = (delay = 0) => reduceMotion ? {} : { initial: { opacity: 0, y: 18 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.52, delay, ease: premiumEase } };
+  const cardMotion = (index: number) => reduceMotion ? {} : {
+    initial: { opacity: 0, y: 22 },
+    animate: { opacity: 1, y: 0 },
+    transition: { type: "spring" as const, stiffness: 180, damping: 22, delay: 0.24 + index * 0.08 },
+    whileHover: { y: -6, transition: { type: "spring" as const, stiffness: 340, damping: 24 } },
+    whileTap: { y: -2, transition: { type: "spring" as const, stiffness: 420, damping: 30 } },
+  };
+
+  useEffect(() => {
+    const syncView = () => setView(viewFromLocation());
+    syncView();
+    window.addEventListener("popstate", syncView);
+    return () => window.removeEventListener("popstate", syncView);
+  }, []);
+
+  const navigate = (nextView: HomeView) => {
+    setView(nextView);
+    const url = nextView === "categories" ? window.location.pathname : `${window.location.pathname}?category=${nextView}`;
+    window.history.pushState({}, "", url);
+  };
 
   if (selectedPreset) return <OrganizerEditor initialParams={selectedPreset.params} />;
   if (selectedDeskOrganizer) return <SimpleModelEditor spec={selectedDeskOrganizer} />;
 
-  return <main className="projectsHome">
-    <header className="consoleHeader"><nav className="floatingNav" aria-label="Main navigation"><button className="brand brandButton" onClick={() => setView("categories")}><span>Make</span><b>3D</b></button><div className="navLinks"><button className={view === "categories" ? "navLink is-active" : "navLink"} onClick={() => setView("categories")}>Categories</button><button className={view === "organizers" ? "navLink is-active" : "navLink"} onClick={() => setView("organizers")}>Organizers</button><button className={view === "desk-accessories" ? "navLink is-active" : "navLink"} onClick={() => setView("desk-accessories")}>Desk</button></div><button className="navCta" onClick={() => setView("organizers")}>Browse projects</button></nav></header>
+  return <motion.main className="projectsHome" {...enter()}>
+    <header className="consoleHeader"><motion.nav className="floatingNav" aria-label="Main navigation" {...enter(0.08)}><button className="brand brandButton" onClick={() => navigate("categories")}><span>Make</span><b>3D</b></button><div className="navLinks"><button className={view === "categories" ? "navLink is-active" : "navLink"} onClick={() => navigate("categories")}>Categories</button><button className={view === "organizers" ? "navLink is-active" : "navLink"} onClick={() => navigate("organizers")}>Organizers</button><button className={view === "desk-accessories" ? "navLink is-active" : "navLink"} onClick={() => navigate("desk-accessories")}>Desk</button></div><button className="navCta" onClick={() => navigate("organizers")}>Browse projects</button></motion.nav></header>
     {view === "categories" ? <>
-      <section className="projectsCatalogue projectsCatalogue--home" aria-labelledby="categories-title"><div className="catalogueHead"><div><h1 id="categories-title">Choose a category.</h1><p>Start with a tested component, adjust its dimensions and export an STL when it is ready.</p></div></div><div className="categoryGrid"><button className="categoryCard" onClick={() => setView("organizers")}><span className="categoryGlyph" aria-hidden="true">▦</span><span className="projectCardMeta">4 projects available</span><strong>Organizers</strong><span className="projectCardDescription">Configurable trays for drawers, desks and the little things that need a place.</span><span className="projectCardAction">Browse organizers <span aria-hidden="true">→</span></span></button><button className="categoryCard" onClick={() => setView("desk-accessories")}><span className="categoryGlyph" aria-hidden="true">◒</span><span className="projectCardMeta">2 projects available</span><strong>Desk accessories</strong><span className="projectCardDescription">Purpose-built models for cables and everyday workspace hardware.</span><span className="projectCardAction">Browse desk projects <span aria-hidden="true">→</span></span></button><div className="categoryCard categoryCard--soon"><span className="categoryGlyph" aria-hidden="true">⌁</span><span className="projectCardMeta">Coming soon</span><strong>Cable management</strong><span className="projectCardDescription">Small prints for tidier routes and connections.</span></div></div></section>
+      <motion.section className="projectsCatalogue projectsCatalogue--home" aria-labelledby="categories-title" {...enter(0.15)}><div className="catalogueHead"><div><h1 id="categories-title">Choose a category.</h1><p>Start with a tested component, adjust its dimensions and export an STL when it is ready.</p></div></div><div className="categoryGrid"><motion.button className="categoryCard" onClick={() => navigate("organizers")} {...cardMotion(0)}><span className="categoryGlyph" aria-hidden="true">▦</span><span className="projectCardMeta">4 projects available</span><strong>Organizers</strong><span className="projectCardDescription">Configurable trays for drawers, desks and the little things that need a place.</span><span className="projectCardAction">Browse organizers <span aria-hidden="true">→</span></span></motion.button><motion.button className="categoryCard" onClick={() => navigate("desk-accessories")} {...cardMotion(1)}><span className="categoryGlyph" aria-hidden="true">◒</span><span className="projectCardMeta">2 projects available</span><strong>Desk accessories</strong><span className="projectCardDescription">Purpose-built models for cables and everyday workspace hardware.</span><span className="projectCardAction">Browse desk projects <span aria-hidden="true">→</span></span></motion.button><motion.div className="categoryCard categoryCard--soon" {...cardMotion(2)}><span className="categoryGlyph" aria-hidden="true">⌁</span><span className="projectCardMeta">Coming soon</span><strong>Cable management</strong><span className="projectCardDescription">Small prints for tidier routes and connections.</span></motion.div></div></motion.section>
     </> : view === "organizers" ? <>
       <section className="projectsIntro projectsIntro--compact" aria-labelledby="projects-title"><h1 id="projects-title">Choose an organizer<br />to make your own.</h1><p>Pick a starting layout, then adjust its dimensions, walls and compartments in the editor.</p></section>
       <section className="projectsCatalogue" aria-labelledby="catalogue-title"><div className="catalogueHead"><div><h2 id="catalogue-title">Choose a starting point</h2></div><span>{organizerPresets.length} presets</span></div><div className="projectGrid">{organizerPresets.map((preset) => <button className="projectCard" key={preset.id} onClick={() => setSelectedPreset(preset)}><OrganizerThumbnail preset={preset} /><span className="projectCardMeta">{preset.params.width} × {preset.params.depth} × {preset.params.height} mm · {preset.params.columns * preset.params.rows} compartments</span><strong>{preset.title}</strong><span className="projectCardDescription">{preset.description}</span><span className="projectCardAction">Open project <span aria-hidden="true">→</span></span></button>)}</div></section>
@@ -60,5 +89,5 @@ export function GeneratorHome() {
       <section className="projectsCatalogue" aria-labelledby="catalogue-title"><div className="catalogueHead"><div><h2 id="catalogue-title">Choose a mounting method</h2></div><span>2 projects</span></div><div className="projectGrid"><button className="projectCard" onClick={() => setSelectedDeskOrganizer(cableDeskOrganizerScrew)}><CableDeskThumbnail /><span className="projectCardMeta">180 mm editable length · 4 mounting holes</span><strong>Under-Desk Cable Channel</strong><span className="projectCardDescription">A screw-mounted cable channel with a snap-in front lip for removable cables.</span><span className="projectCardAction">Choose screw mount <span aria-hidden="true">→</span></span></button><button className="projectCard" onClick={() => setSelectedDeskOrganizer(cableDeskOrganizerAdhesive)}><CableDeskThumbnail /><span className="projectCardMeta">180 mm editable length · flat tape surface</span><strong>Under-Desk Cable Channel</strong><span className="projectCardDescription">The same snap-in channel with a clean mounting plate for strong double-sided tape.</span><span className="projectCardAction">Choose adhesive mount <span aria-hidden="true">→</span></span></button></div></section>
     </>}
     <footer className="consoleFooter">Made for FDM-printing hobbyists <span aria-hidden="true">·</span> Models stay in your browser <span aria-hidden="true">·</span> Export STL when ready</footer>
-  </main>;
+  </motion.main>;
 }
