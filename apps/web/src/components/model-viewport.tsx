@@ -47,8 +47,8 @@ function CameraFit({ model, resetToken }: { model: GeneratedModel; resetToken: n
 export function ModelViewport({ model, wireframe, resetToken }: { model?: GeneratedModel; wireframe: boolean; resetToken: number }) {
   const [colors, setColors] = useState<{ canvas: THREE.Color; model: THREE.Color; grid: THREE.Color; gridStrong: THREE.Color } | null>(null);
   useEffect(() => {
-    setColors({ canvas: readColorToken("--color-canvas"), model: readColorToken("--color-model"), grid: readColorToken("--color-grid"), gridStrong: readColorToken("--color-grid-strong") });
+    setColors({ canvas: readColorToken("--color-canvas"), model: readColorToken("--color-model-3d"), grid: readColorToken("--color-grid"), gridStrong: readColorToken("--color-grid-strong") });
   }, []);
   if (!colors) return <div className="canvasWrap" />;
-  return <div className="canvasWrap"><Canvas camera={{ position: [120, 100, 120], fov: 38 }}><color attach="background" args={[colors.canvas]} /><ambientLight intensity={2.15} /><directionalLight position={[100, 160, 80]} intensity={0.7} /><directionalLight position={[-80, 70, -120]} intensity={0.35} /><Grid args={[400, 400]} cellSize={10} cellThickness={0.6} sectionSize={50} sectionThickness={1.1} cellColor={colors.grid} sectionColor={colors.gridStrong} fadeDistance={450} />{model ? <><Mesh model={model} wireframe={wireframe} color={colors.model} /><CameraFit model={model} resetToken={resetToken} /></> : null}</Canvas></div>;
+  return <div className="canvasWrap"><Canvas camera={{ position: [120, 100, 120], fov: 38 }}><color attach="background" args={[colors.canvas]} /><ambientLight intensity={1.05} /><directionalLight position={[100, 160, 80]} intensity={1.15} /><directionalLight position={[-80, 70, -120]} intensity={0.55} /><Grid args={[400, 400]} cellSize={10} cellThickness={0.6} sectionSize={50} sectionThickness={1.1} cellColor={colors.grid} sectionColor={colors.gridStrong} fadeDistance={450} />{model ? <><Mesh model={model} wireframe={wireframe} color={colors.model} /><CameraFit model={model} resetToken={resetToken} /></> : null}</Canvas></div>;
 }

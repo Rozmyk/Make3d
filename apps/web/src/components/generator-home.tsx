@@ -1,35 +1,16 @@
 "use client";
 
-import { cableDeskOrganizerDefaults, cableDeskOrganizerParamsSchema } from "@make3d/validation";
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { organizerPresets, type OrganizerPreset } from "../organizer-presets";
-import { OrganizerEditor } from "./organizer-editor";
-import { type SimpleModelSpec, SimpleModelEditor } from "./simple-model-editor";
 
-type HomeView = "categories" | "organizers" | "desk-accessories";
+type HomeView = "categories" | "organizers" | "cable-management" | "desk-mounts" | "pegboard";
 const premiumEase = [0.16, 1, 0.3, 1] as const;
 
 function viewFromLocation(): HomeView {
   const category = new URLSearchParams(window.location.search).get("category");
-  return category === "organizers" || category === "desk-accessories" ? category : "categories";
+  return category === "organizers" || category === "cable-management" || category === "desk-mounts" || category === "pegboard" ? category : "categories";
 }
-
-const cableDeskOrganizerScrew: SimpleModelSpec = {
-  type: "cable-desk-organizer",
-  title: "Under-Desk Cable Channel — Screw Mount",
-  filename: "under-desk-cable-channel-screw-mount",
-  defaults: cableDeskOrganizerDefaults,
-  schema: cableDeskOrganizerParamsSchema,
-  groups: [{ label: "Channel length", fields: [{ key: "length", label: "Length", step: 1 }] }],
-};
-
-const cableDeskOrganizerAdhesive: SimpleModelSpec = {
-  ...cableDeskOrganizerScrew,
-  title: "Under-Desk Cable Channel — Adhesive Mount",
-  filename: "under-desk-cable-channel-adhesive-mount",
-  defaults: { ...cableDeskOrganizerDefaults, mountStyle: "adhesive" },
-};
 
 function OrganizerThumbnail({ preset }: { preset: OrganizerPreset }) {
   const { columns, rows } = preset.params;
@@ -49,8 +30,6 @@ function CableDeskThumbnail() {
 
 export function GeneratorHome() {
   const [view, setView] = useState<HomeView>("categories");
-  const [selectedPreset, setSelectedPreset] = useState<OrganizerPreset>();
-  const [selectedDeskOrganizer, setSelectedDeskOrganizer] = useState<SimpleModelSpec>();
   const reduceMotion = useReducedMotion();
   const enter = (delay = 0) => reduceMotion ? {} : { initial: { opacity: 0, y: 18 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.52, delay, ease: premiumEase } };
   const cardMotion = (index: number) => reduceMotion ? {} : {
@@ -74,19 +53,22 @@ export function GeneratorHome() {
     window.history.pushState({}, "", url);
   };
 
-  if (selectedPreset) return <OrganizerEditor initialParams={selectedPreset.params} />;
-  if (selectedDeskOrganizer) return <SimpleModelEditor spec={selectedDeskOrganizer} />;
-
   return <motion.main className="projectsHome" {...enter()}>
-    <header className="consoleHeader"><motion.nav className="floatingNav" aria-label="Main navigation" {...enter(0.08)}><button className="brand brandButton" onClick={() => navigate("categories")}><span>Make</span><b>3D</b></button><div className="navLinks"><button className={view === "categories" ? "navLink is-active" : "navLink"} onClick={() => navigate("categories")}>Categories</button><button className={view === "organizers" ? "navLink is-active" : "navLink"} onClick={() => navigate("organizers")}>Organizers</button><button className={view === "desk-accessories" ? "navLink is-active" : "navLink"} onClick={() => navigate("desk-accessories")}>Desk</button></div><button className="navCta" onClick={() => navigate("organizers")}>Browse projects</button></motion.nav></header>
+    <header className="consoleHeader"><motion.nav className="floatingNav" aria-label="Main navigation" {...enter(0.08)}><button className="brand brandButton" onClick={() => navigate("categories")} aria-label="Make3D home"><img className="brandLogo" src="/make3d-logo.svg" alt="Make3D" /></button><div className="navLinks"><button className="navLink is-active" onClick={() => navigate("categories")}>Models</button><a className="navLink" href="https://github.com/Rozmyk/Make3d" target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a><a className="navLink" href="https://github.com/Rozmyk/Make3d/issues/new" target="_blank" rel="noreferrer">Request a model <span aria-hidden="true">↗</span></a></div><button className="navCta" onClick={() => navigate("categories")}>Browse models</button></motion.nav></header>
     {view === "categories" ? <>
-      <motion.section className="projectsCatalogue projectsCatalogue--home" aria-labelledby="categories-title" {...enter(0.15)}><div className="catalogueHead"><div><h1 id="categories-title">Choose a category.</h1><p>Start with a tested component, adjust its dimensions and export an STL when it is ready.</p></div></div><div className="categoryGrid"><motion.button className="categoryCard" onClick={() => navigate("organizers")} {...cardMotion(0)}><span className="categoryGlyph" aria-hidden="true">▦</span><span className="projectCardMeta">4 projects available</span><strong>Organizers</strong><span className="projectCardDescription">Configurable trays for drawers, desks and the little things that need a place.</span><span className="projectCardAction">Browse organizers <span aria-hidden="true">→</span></span></motion.button><motion.button className="categoryCard" onClick={() => navigate("desk-accessories")} {...cardMotion(1)}><span className="categoryGlyph" aria-hidden="true">◒</span><span className="projectCardMeta">2 projects available</span><strong>Desk accessories</strong><span className="projectCardDescription">Purpose-built models for cables and everyday workspace hardware.</span><span className="projectCardAction">Browse desk projects <span aria-hidden="true">→</span></span></motion.button><motion.div className="categoryCard categoryCard--soon" {...cardMotion(2)}><span className="categoryGlyph" aria-hidden="true">⌁</span><span className="projectCardMeta">Coming soon</span><strong>Cable management</strong><span className="projectCardDescription">Small prints for tidier routes and connections.</span></motion.div></div></motion.section>
+      <motion.section className="projectsCatalogue projectsCatalogue--home" aria-labelledby="categories-title" {...enter(0.15)}><div className="catalogueHead"><div><h1 id="categories-title">Choose a category.</h1><p>Start with a tested component, adjust its dimensions and export an STL when it is ready.</p></div></div><div className="categoryGrid"><motion.button className="categoryCard" onClick={() => navigate("organizers")} {...cardMotion(0)}><span className="categoryGlyph" aria-hidden="true">▦</span><span className="projectCardMeta">5 projects available</span><strong>Organizers</strong><span className="projectCardDescription">Configurable trays, boxes and compact storage for the little things that need a place.</span><span className="projectCardAction">Browse organizers <span aria-hidden="true">→</span></span></motion.button><motion.button className="categoryCard" onClick={() => navigate("cable-management")} {...cardMotion(1)}><span className="categoryGlyph" aria-hidden="true">⌁</span><span className="projectCardMeta">3 projects available</span><strong>Cable management</strong><span className="projectCardDescription">Channels and clips that keep the desk setup tidy and easy to change.</span><span className="projectCardAction">Browse cable models <span aria-hidden="true">→</span></span></motion.button><motion.button className="categoryCard" onClick={() => navigate("desk-mounts")} {...cardMotion(2)}><span className="categoryGlyph" aria-hidden="true">⌟</span><span className="projectCardMeta">1 project available</span><strong>Desk mounts</strong><span className="projectCardDescription">Made-to-fit holders for hardware mounted under the desk.</span><span className="projectCardAction">Browse desk mounts <span aria-hidden="true">→</span></span></motion.button><motion.button className="categoryCard" onClick={() => navigate("pegboard")} {...cardMotion(3)}><span className="categoryGlyph" aria-hidden="true">⠿</span><span className="projectCardMeta">1 project available</span><strong>Pegboard</strong><span className="projectCardDescription">Modular add-ons for IKEA Skådis-compatible pegboards.</span><span className="projectCardAction">Browse pegboard models <span aria-hidden="true">→</span></span></motion.button></div></motion.section>
     </> : view === "organizers" ? <>
       <section className="projectsIntro projectsIntro--compact" aria-labelledby="projects-title"><h1 id="projects-title">Choose an organizer<br />to make your own.</h1><p>Pick a starting layout, then adjust its dimensions, walls and compartments in the editor.</p></section>
-      <section className="projectsCatalogue" aria-labelledby="catalogue-title"><div className="catalogueHead"><div><h2 id="catalogue-title">Choose a starting point</h2></div><span>{organizerPresets.length} presets</span></div><div className="projectGrid">{organizerPresets.map((preset) => <button className="projectCard" key={preset.id} onClick={() => setSelectedPreset(preset)}><OrganizerThumbnail preset={preset} /><span className="projectCardMeta">{preset.params.width} × {preset.params.depth} × {preset.params.height} mm · {preset.params.columns * preset.params.rows} compartments</span><strong>{preset.title}</strong><span className="projectCardDescription">{preset.description}</span><span className="projectCardAction">Open project <span aria-hidden="true">→</span></span></button>)}</div></section>
-    </> : <>
+      <section className="projectsCatalogue" aria-labelledby="catalogue-title"><div className="catalogueHead"><div><h2 id="catalogue-title">Choose a starting point</h2></div></div><div className="projectGrid">{organizerPresets.map((preset) => <a className="projectCard projectCard--technical" key={preset.id} href={`/models/organizer-${preset.id}`}><span className="projectTechnicalBadge">{preset.params.width} × {preset.params.depth} × {preset.params.height} mm</span><OrganizerThumbnail preset={preset} /><strong>{preset.title}</strong></a>)}<a className="projectCard projectCard--technical" href="/models/storage-box"><span className="projectTechnicalBadge">Box + separate lid</span><OrganizerThumbnail preset={organizerPresets[0]} /><strong>Storage Box with Lid</strong></a></div></section>
+    </> : view === "cable-management" ? <>
       <section className="projectsIntro projectsIntro--compact" aria-labelledby="projects-title"><h1 id="projects-title">Keep cables<br />where they belong.</h1><p>Mount a channel under the desk, then press cables through its flexible front lip to keep them tidy and removable.</p></section>
-      <section className="projectsCatalogue" aria-labelledby="catalogue-title"><div className="catalogueHead"><div><h2 id="catalogue-title">Choose a mounting method</h2></div><span>2 projects</span></div><div className="projectGrid"><button className="projectCard" onClick={() => setSelectedDeskOrganizer(cableDeskOrganizerScrew)}><CableDeskThumbnail /><span className="projectCardMeta">180 mm editable length · 4 mounting holes</span><strong>Under-Desk Cable Channel</strong><span className="projectCardDescription">A screw-mounted cable channel with a snap-in front lip for removable cables.</span><span className="projectCardAction">Choose screw mount <span aria-hidden="true">→</span></span></button><button className="projectCard" onClick={() => setSelectedDeskOrganizer(cableDeskOrganizerAdhesive)}><CableDeskThumbnail /><span className="projectCardMeta">180 mm editable length · flat tape surface</span><strong>Under-Desk Cable Channel</strong><span className="projectCardDescription">The same snap-in channel with a clean mounting plate for strong double-sided tape.</span><span className="projectCardAction">Choose adhesive mount <span aria-hidden="true">→</span></span></button></div></section>
+      <section className="projectsCatalogue" aria-labelledby="catalogue-title"><div className="catalogueHead"><div><h2 id="catalogue-title">Choose a cable model</h2></div></div><div className="projectGrid"><a className="projectCard projectCard--technical" href="/models/cable-channel-screw"><span className="projectTechnicalBadge">Screw mount</span><CableDeskThumbnail /><strong>Under-Desk Cable Channel</strong></a><a className="projectCard projectCard--technical" href="/models/cable-channel-adhesive"><span className="projectTechnicalBadge">Adhesive mount</span><CableDeskThumbnail /><strong>Under-Desk Cable Channel</strong></a><a className="projectCard projectCard--technical" href="/models/compact-cable-organizer"><span className="projectTechnicalBadge">Tape or screws · 1–8 cables</span><CableDeskThumbnail /><strong>Compact Cable Organizer</strong></a></div></section>
+    </> : view === "desk-mounts" ? <>
+      <section className="projectsIntro projectsIntro--compact" aria-labelledby="projects-title"><h1 id="projects-title">Mount hardware<br />out of sight.</h1><p>Create a precise under-desk holder for a hub, power supply, router or dock.</p></section>
+      <section className="projectsCatalogue" aria-labelledby="catalogue-title"><div className="catalogueHead"><div><h2 id="catalogue-title">Choose a desk mount</h2></div></div><div className="projectGrid"><a className="projectCard projectCard--technical" href="/models/under-desk-holder"><span className="projectTechnicalBadge">Device-size fit</span><CableDeskThumbnail /><strong>Under-Desk Device Holder</strong></a></div></section>
+    </> : <>
+      <section className="projectsIntro projectsIntro--compact" aria-labelledby="projects-title"><h1 id="projects-title">Build out<br />your pegboard.</h1><p>Start with a shelf sized for an IKEA Skådis-compatible pegboard.</p></section>
+      <section className="projectsCatalogue" aria-labelledby="catalogue-title"><div className="catalogueHead"><div><h2 id="catalogue-title">Choose a pegboard model</h2></div></div><div className="projectGrid"><a className="projectCard projectCard--technical" href="/models/pegboard-shelf"><span className="projectTechnicalBadge">Skådis compatible</span><CableDeskThumbnail /><strong>Pegboard Shelf</strong></a></div></section>
     </>}
     <footer className="consoleFooter">Made for FDM-printing hobbyists <span aria-hidden="true">·</span> Models stay in your browser <span aria-hidden="true">·</span> Export STL when ready</footer>
   </motion.main>;

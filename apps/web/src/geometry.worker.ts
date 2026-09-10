@@ -1,8 +1,8 @@
 import { createOrganizer } from "@make3d/geometry/organizer";
-import { createCableDeskOrganizer, createCableGuide, createPhoneStand } from "@make3d/geometry/basic";
-import type { CableDeskOrganizerParams, CableGuideParams, GeneratorType, OrganizerParams, PhoneStandParams } from "@make3d/types";
+import { createCableClip, createCableDeskOrganizer, createCableGuide, createPegboardShelf, createPhoneStand, createStorageBox, createUnderDeskHolder } from "@make3d/geometry/basic";
+import type { CableClipParams, CableDeskOrganizerParams, CableGuideParams, GeneratorType, OrganizerParams, PegboardShelfParams, PhoneStandParams, StorageBoxParams, UnderDeskHolderParams } from "@make3d/types";
 
-type Request = { id: number; type: GeneratorType; params: OrganizerParams | PhoneStandParams | CableGuideParams | CableDeskOrganizerParams };
+type Request = { id: number; type: GeneratorType; params: OrganizerParams | PhoneStandParams | CableGuideParams | CableDeskOrganizerParams | PegboardShelfParams | CableClipParams | UnderDeskHolderParams | StorageBoxParams };
 
 const workerScope = self as unknown as {
   onmessage: ((event: MessageEvent<Request>) => void) | null;
@@ -17,7 +17,15 @@ workerScope.onmessage = async ({ data }: MessageEvent<Request>) => {
         ? await createPhoneStand(data.params)
         : data.type === "cable-guide"
           ? await createCableGuide(data.params)
-          : await createCableDeskOrganizer(data.params);
+          : data.type === "cable-desk-organizer"
+            ? await createCableDeskOrganizer(data.params)
+            : data.type === "pegboard-shelf"
+              ? await createPegboardShelf(data.params)
+              : data.type === "cable-clip"
+                ? await createCableClip(data.params)
+                : data.type === "under-desk-holder"
+                  ? await createUnderDeskHolder(data.params)
+                  : await createStorageBox(data.params);
     workerScope.postMessage({ id: data.id, model }, [model.mesh.positions.buffer, model.mesh.indices.buffer]);
   } catch (error) {
     workerScope.postMessage({ id: data.id, error: error instanceof Error ? error.message : "Geometry generation failed." });

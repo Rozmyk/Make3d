@@ -41,8 +41,8 @@ export function OrganizerEditor({ initialParams = organizerDefaults }: { initial
     URL.revokeObjectURL(url);
   };
 
-  return <main className="workbench">
-    <header className="topbar"><a className="brand" href="/"><span>Make</span><b>3D</b></a><span className="productLabel">Organizer</span><div className="topbarActions"><span className="status" aria-live="polite">{status}</span><button className="button buttonExport" disabled={!model} onClick={download}>Export STL <span aria-hidden="true">↓</span></button></div></header>
+  return <main className="workbench projectsHome">
+    <header className="consoleHeader"><nav className="floatingNav" aria-label="Main navigation"><a className="brand" href="/"><img className="brandLogo" src="/make3d-logo.svg" alt="Make3D" /></a><div className="navLinks"><a className="navLink is-active" href="/">Models</a><a className="navLink" href="https://github.com/Rozmyk/Make3d" target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a><a className="navLink" href="https://github.com/Rozmyk/Make3d/issues/new" target="_blank" rel="noreferrer">Request a model <span aria-hidden="true">↗</span></a></div><span className="srOnly" aria-live="polite">{status}</span><button className="navCta buttonExport" disabled={!model} onClick={download}>Export STL <span aria-hidden="true">↓</span></button></nav></header>
     <section className="editor" aria-label="Organizer editor">
       <aside className="parameters"><div className="parameterDetails"><div className="panelHeading"><span>Model settings</span><span className="unitLabel">mm</span></div>
         {parameterGroups.map((group) => <section className="parameterGroup" key={group.label}><h2>{group.label}</h2><div className="fieldList">{group.fields.map((field) => <label className="field" key={field.key}><span>{field.label}</span><div className="inputWrap"><input aria-label={field.label} type="number" value={params[field.key]} step={field.step} onChange={(event) => update(field.key, Number(event.target.value))} /><span>{field.unit}</span></div></label>)}</div></section>)}

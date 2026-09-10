@@ -116,3 +116,41 @@ export const cableDeskOrganizerParamsSchema = z.object({
   if (value.cableDiameter >= value.depth / 2) context.addIssue({ code: z.ZodIssueCode.custom, path: ["cableDiameter"], message: "Cable diameter is too large for this channel depth." });
   if (value.backHeight <= value.baseThickness) context.addIssue({ code: z.ZodIssueCode.custom, path: ["backHeight"], message: "Back height must exceed base thickness." });
 });
+
+export const pegboardShelfDefaults = { width: 120, depth: 80 } as const;
+export const pegboardShelfParamsSchema = z.object({
+  width: millimetres(60, 300),
+  depth: millimetres(35, 180),
+});
+
+export const cableClipDefaults = { cableDiameter: 8, cableCount: 3, spacing: 15, mountStyle: "screws" } as const;
+export const cableClipParamsSchema = z.object({
+  cableDiameter: millimetres(3, 16),
+  cableCount: z.coerce.number().int().min(1).max(8),
+  spacing: millimetres(2, 30),
+  mountStyle: z.enum(["screws", "adhesive"]),
+});
+
+export const underDeskHolderDefaults = { deviceWidth: 110, deviceHeight: 32, deviceDepth: 85, screwCount: 4, holeDiameter: 4.5 } as const;
+export const underDeskHolderParamsSchema = z.object({
+  deviceWidth: millimetres(35, 300),
+  deviceHeight: millimetres(12, 100),
+  deviceDepth: millimetres(35, 220),
+  screwCount: z.coerce.number().int().min(2).max(6),
+  holeDiameter: millimetres(3, 8),
+});
+
+export const storageBoxDefaults = { width: 120, depth: 80, height: 50, wallThickness: 2.4, lidClearance: 0.35, cornerRadius: 6, snapLatches: false } as const;
+export const storageBoxParamsSchema = z.object({
+  width: millimetres(40, 300),
+  depth: millimetres(40, 300),
+  height: millimetres(20, 180),
+  wallThickness: millimetres(1.2, 6),
+  lidClearance: millimetres(0.15, 1.2),
+  cornerRadius: millimetres(0, 50),
+  snapLatches: z.boolean(),
+}).superRefine((value, context) => {
+  if (value.wallThickness * 2 >= Math.min(value.width, value.depth)) context.addIssue({ code: z.ZodIssueCode.custom, path: ["wallThickness"], message: "Wall thickness leaves no interior space." });
+  if (value.wallThickness >= value.height) context.addIssue({ code: z.ZodIssueCode.custom, path: ["wallThickness"], message: "Wall thickness must be less than box height." });
+  if (value.cornerRadius > Math.min(value.width, value.depth) / 2) context.addIssue({ code: z.ZodIssueCode.custom, path: ["cornerRadius"], message: "Corner radius is too large for these dimensions." });
+});

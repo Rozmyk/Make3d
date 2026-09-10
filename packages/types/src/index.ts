@@ -1,4 +1,4 @@
-export type GeneratorType = "organizer" | "phone-stand" | "cable-guide" | "cable-desk-organizer";
+export type GeneratorType = "organizer" | "phone-stand" | "cable-guide" | "cable-desk-organizer" | "pegboard-shelf" | "cable-clip" | "under-desk-holder" | "storage-box";
 
 export interface OrganizerParams {
   width: number;
@@ -38,6 +38,36 @@ export interface CableDeskOrganizerParams {
   backHeight: number;
   cableDiameter: number;
   mountStyle: "screws" | "adhesive";
+}
+
+export interface PegboardShelfParams {
+  width: number;
+  depth: number;
+}
+
+export interface CableClipParams {
+  cableDiameter: number;
+  cableCount: number;
+  spacing: number;
+  mountStyle: "screws" | "adhesive";
+}
+
+export interface UnderDeskHolderParams {
+  deviceWidth: number;
+  deviceHeight: number;
+  deviceDepth: number;
+  screwCount: number;
+  holeDiameter: number;
+}
+
+export interface StorageBoxParams {
+  width: number;
+  depth: number;
+  height: number;
+  wallThickness: number;
+  lidClearance: number;
+  cornerRadius: number;
+  snapLatches: boolean;
 }
 
 export interface MeshData {

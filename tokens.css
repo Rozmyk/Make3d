@@ -3,6 +3,7 @@
   --color-surface: oklch(7% 0.004 255);
   --color-canvas: oklch(3.5% 0.002 255);
   --color-model: oklch(86% 0.006 255);
+  --color-model-3d: oklch(66% 0.14 250);
   --color-grid: oklch(19% 0.006 255);
   --color-grid-strong: oklch(29% 0.008 255);
   --color-ink: oklch(96% 0.002 255);
@@ -73,6 +74,7 @@
   --category-violet: oklch(69% 0.15 305);
   --category-green: oklch(70% 0.14 150);
   --category-amber: oklch(76% 0.14 75);
+  --category-blue: oklch(70% 0.13 245);
   --tally-paper: oklch(97% 0.008 255);
   --tally-panel: oklch(99% 0.004 255);
   --tally-panel-muted: oklch(95% 0.012 255);
