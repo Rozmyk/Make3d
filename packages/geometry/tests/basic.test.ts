@@ -54,9 +54,17 @@ describe("basic printable models", () => {
   });
 
   it("matches the compact cable organizer reference envelope", async () => {
+    const oneCable = await createCableClip({ ...cableClipDefaults, cableCount: 1 });
     const model = await createCableClip(cableClipDefaults);
-    expect(model.metadata.boundingBox.width).toBeCloseTo(73.2, 1);
-    expect(model.metadata.boundingBox.depth).toBeCloseTo(29, 1);
-    expect(model.metadata.boundingBox.height).toBeCloseTo(37, 1);
+    expect(model.metadata.compartmentCount).toBe(cableClipDefaults.cableCount);
+    expect(model.metadata.boundingBox.width).toBeGreaterThan(oneCable.metadata.boundingBox.width);
+    expect(model.metadata.triangleCount).toBeGreaterThan(oneCable.metadata.triangleCount);
+  });
+
+  it("creates a distinct mounting-hole layout for every supported screw count", async () => {
+    const volumes = await Promise.all([2, 3, 4, 5, 6].map(async (screwCount) =>
+      (await createUnderDeskHolder({ ...underDeskHolderDefaults, screwCount })).metadata.volumeMm3,
+    ));
+    expect(new Set(volumes.map((volume) => volume.toFixed(3))).size).toBe(volumes.length);
   });
 });

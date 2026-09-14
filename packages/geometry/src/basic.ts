@@ -60,7 +60,7 @@ function meshFromManifold(manifold: Solid): MeshData {
   return { positions, indices: new Uint32Array(mesh.triVerts) };
 }
 
-function buildModel(manifold: Solid, messages: string[] = []): GeneratedModel {
+function buildModel(manifold: Solid, messages: string[] = [], compartmentCount = 1): GeneratedModel {
   try {
     if (manifold.status() !== "NoError") throw new GeometryGenerationError(`Manifold failed: ${manifold.status()}`);
     const mesh = meshFromManifold(manifold);
@@ -70,7 +70,7 @@ function buildModel(manifold: Solid, messages: string[] = []): GeneratedModel {
       boundingBox: { width: bounds.max[0] - bounds.min[0], depth: bounds.max[1] - bounds.min[1], height: bounds.max[2] - bounds.min[2] },
       volumeMm3: Math.abs(manifold.volume()),
       triangleCount: mesh.indices.length / 3,
-      compartmentCount: 1,
+      compartmentCount,
       printability: { valid: true, messages },
     };
     return { mesh, metadata };
@@ -184,31 +184,28 @@ export async function createCableClip(input: unknown): Promise<GeneratedModel> {
   const wall = 2.4;
   const channelWidth = params.cableDiameter + wall * 2;
   const totalWidth = params.cableCount * channelWidth + (params.cableCount - 1) * params.spacing + wall * 2;
-  // The supplied reference is a single continuous under-desk channel rather than
-  // separate clips: its default silhouette is approximately 73 × 29 × 37 mm.
-  const totalDepth = 29;
-  const channelHeight = 37;
+  const totalDepth = Math.max(24, params.cableDiameter + wall * 4 + 10);
+  const channelHeight = Math.max(20, params.cableDiameter + wall * 2 + 8);
   const plateThickness = 3.5;
   const floorZ = plateThickness - channelHeight;
-  const lipHeight = 14;
-  const parts: Solid[] = [
-    // Full plate against the underside of the desk.
-    cuboid(module, totalWidth, totalDepth, plateThickness, 0, 0, plateThickness / 2),
-    // Continuous U-shaped channel below the plate.
-    cuboid(module, totalWidth, wall, channelHeight, 0, -totalDepth / 2 + wall / 2, plateThickness - channelHeight / 2),
-    cuboid(module, totalWidth, totalDepth, wall, 0, 0, floorZ + wall / 2),
-    cuboid(module, wall, totalDepth, channelHeight - wall, -totalWidth / 2 + wall / 2, 0, floorZ + (channelHeight - wall) / 2),
-    cuboid(module, wall, totalDepth, channelHeight - wall, totalWidth / 2 - wall / 2, 0, floorZ + (channelHeight - wall) / 2),
-    // Low open-front retaining lip — cables can be pushed in and pulled out below it.
-    cuboid(module, totalWidth - wall * 2, wall, lipHeight, 0, totalDepth / 2 - wall / 2, floorZ + lipHeight / 2),
-  ];
+  const lipHeight = Math.max(7, Math.min(channelHeight * 0.45, params.cableDiameter + wall));
+  const parts: Solid[] = [cuboid(module, totalWidth, totalDepth, plateThickness, 0, 0, plateThickness / 2)];
+  for (let index = 0; index < params.cableCount; index += 1) {
+    const x = -totalWidth / 2 + wall + channelWidth / 2 + index * (channelWidth + params.spacing);
+    parts.push(
+      cuboid(module, channelWidth, totalDepth, wall, x, 0, floorZ + wall / 2),
+      cuboid(module, wall, totalDepth, channelHeight - wall, x - channelWidth / 2 + wall / 2, 0, floorZ + (channelHeight - wall) / 2),
+      cuboid(module, wall, totalDepth, channelHeight - wall, x + channelWidth / 2 - wall / 2, 0, floorZ + (channelHeight - wall) / 2),
+      cuboid(module, channelWidth - wall * 2, wall, lipHeight, x, totalDepth / 2 - wall / 2, floorZ + lipHeight / 2),
+    );
+  }
   const holes = params.mountStyle === "screws"
     ? [-totalWidth * 0.27, totalWidth * 0.27].map((x) => module.Manifold.cylinder(plateThickness + 0.04, 2.25, 2.25, 24).translate([x, 0, -0.02]))
     : [];
   try {
     const body = module.Manifold.union(parts);
     try {
-      return buildModel(holes.length ? module.Manifold.difference([body, ...holes]) : body, [params.mountStyle === "screws" ? "Fasten the compact top plate through the two mounting holes." : "Apply strong double-sided tape to the flat top plate.", "Press cables through the low front lip; the individual channels keep them separated and removable."]);
+      return buildModel(holes.length ? module.Manifold.difference([body, ...holes]) : body, [params.mountStyle === "screws" ? "Fasten the compact top plate through the two mounting holes." : "Apply strong double-sided tape to the flat top plate.", "Each cable has a separate open-front channel, so it stays organised and removable."], params.cableCount);
     } finally { if (holes.length) body.delete(); }
   } finally {
     parts.forEach((part) => part.delete());
@@ -229,9 +226,11 @@ export async function createUnderDeskHolder(input: unknown): Promise<GeneratedMo
     cuboid(module, wall, railDepth, params.deviceHeight + wall, params.deviceWidth / 2 + wall / 2, 0, -(params.deviceHeight + wall) / 2),
     cuboid(module, params.deviceWidth + wall * 2, wall, wall, 0, railDepth / 2 - wall / 2, -params.deviceHeight),
   ];
+  const rows = Math.ceil(params.screwCount / 2);
   const holePositions = Array.from({ length: params.screwCount }, (_, index) => {
-    const x = params.screwCount === 1 ? 0 : -params.deviceWidth * 0.36 + (index % 2) * params.deviceWidth * 0.72;
-    const y = -railDepth / 2 + (index < 2 ? plateDepth * 0.3 : plateDepth * 0.7);
+    const x = params.screwCount === 1 ? 0 : (index % 2 === 0 ? -1 : 1) * params.deviceWidth * 0.36;
+    const row = Math.floor(index / 2);
+    const y = -railDepth / 2 + plateDepth * (rows === 1 ? 0.5 : 0.22 + (row / (rows - 1)) * 0.56);
     return module.Manifold.cylinder(wall + 0.04, params.holeDiameter / 2, params.holeDiameter / 2, 24).translate([x, y, -0.02]);
   });
   try {
