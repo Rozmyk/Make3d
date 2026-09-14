@@ -12,18 +12,13 @@ describe("createOrganizer", () => {
     expect(model.metadata.volumeMm3).toBeGreaterThan(0);
   });
   it("supports one row and column", async () => expect((await createOrganizer({ ...organizerDefaults, columns: 1, rows: 1 })).metadata.compartmentCount).toBe(1));
-  it("builds printable geometry with every organizer feature enabled", async () => {
-    const model = await createOrganizer({ ...organizerDefaults, stackingLip: true, labelTab: true, floorHoles: true });
-    expect(model.metadata.volumeMm3).toBeGreaterThan(0);
-    expect(model.metadata.triangleCount).toBeGreaterThan(0);
-    expect(model.metadata.boundingBox.height).toBeGreaterThan(organizerDefaults.height);
-  });
-  it("changes the mesh for every enabled feature", async () => {
-    const base = await createOrganizer(organizerDefaults);
-    for (const feature of ["stackingLip", "labelTab", "floorHoles"] as const) {
-      const model = await createOrganizer({ ...organizerDefaults, [feature]: true });
-      expect(model.metadata.volumeMm3, feature).not.toBeCloseTo(base.metadata.volumeMm3, 3);
-    }
+  it("controls inside and outside corner radii independently", async () => {
+    const sharpInside = await createOrganizer({ ...organizerDefaults, innerCornerRadius: 0 });
+    const roundedInside = await createOrganizer({ ...organizerDefaults, innerCornerRadius: 6 });
+    const roundedOutside = await createOrganizer({ ...organizerDefaults, cornerRadius: 12 });
+    expect(roundedInside.metadata.volumeMm3).not.toBeCloseTo(sharpInside.metadata.volumeMm3, 3);
+    expect(roundedOutside.metadata.volumeMm3).not.toBeCloseTo(roundedInside.metadata.volumeMm3, 3);
+    expect(roundedInside.metadata.boundingBox).toEqual(sharpInside.metadata.boundingBox);
   });
   it("supports the maximum grid within the documented bounds", async () => {
     const model = await createOrganizer({ ...organizerDefaults, width: 300, depth: 300, columns: 12, rows: 12 });

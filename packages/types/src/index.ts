@@ -7,13 +7,10 @@ export interface OrganizerParams {
   wallThickness: number;
   bottomThickness: number;
   cornerRadius: number;
+  innerCornerRadius: number;
   columns: number;
   rows: number;
   dividerThickness: number;
-  roundedInside: boolean;
-  stackingLip: boolean;
-  labelTab: boolean;
-  floorHoles: boolean;
 }
 
 export interface PhoneStandParams {

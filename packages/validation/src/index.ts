@@ -7,13 +7,10 @@ export const organizerDefaults = {
   wallThickness: 2.4,
   bottomThickness: 2.4,
   cornerRadius: 5,
+  innerCornerRadius: 4,
   columns: 3,
   rows: 2,
   dividerThickness: 2,
-  roundedInside: true,
-  stackingLip: false,
-  labelTab: false,
-  floorHoles: false,
 } as const;
 
 const millimetres = (min: number, max: number) =>
@@ -27,13 +24,10 @@ export const organizerParamsSchema = z
     wallThickness: millimetres(1.2, 6),
     bottomThickness: millimetres(1.2, 6),
     cornerRadius: millimetres(0, 100),
+    innerCornerRadius: millimetres(0, 100),
     columns: z.coerce.number().int().min(1).max(12),
     rows: z.coerce.number().int().min(1).max(12),
     dividerThickness: millimetres(1.2, 6),
-    roundedInside: z.boolean(),
-    stackingLip: z.boolean(),
-    labelTab: z.boolean(),
-    floorHoles: z.boolean(),
   })
   .superRefine((value, context) => {
     const innerWidth = value.width - 2 * value.wallThickness;
@@ -54,6 +48,9 @@ export const organizerParamsSchema = z
     }
     if (compartmentDepth <= 0) {
       context.addIssue({ code: z.ZodIssueCode.custom, path: ["rows"], message: "Rows and divider thickness leave no compartment depth." });
+    }
+    if (value.innerCornerRadius > Math.min(compartmentWidth, compartmentDepth) / 2) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["innerCornerRadius"], message: "Inside corner radius is too large for the smallest compartment." });
     }
   });
 

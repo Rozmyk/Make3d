@@ -8,12 +8,12 @@ import { useOrganizerModel } from "../hooks/use-organizer-model";
 import { organizerEditorInitialParams } from "../organizer-presets";
 import { ModelViewport } from "./model-viewport";
 
-type NumericField = { key: Exclude<keyof OrganizerParams, "roundedInside" | "stackingLip" | "labelTab" | "floorHoles">; label: string; unit?: string; step: number };
+type NumericField = { key: keyof OrganizerParams; label: string; unit?: string; step: number };
 
 const parameterGroups: Array<{ label: string; fields: NumericField[] }> = [
   { label: "Overall size", fields: [{ key: "width", label: "Width", unit: "mm", step: 1 }, { key: "depth", label: "Depth", unit: "mm", step: 1 }, { key: "height", label: "Height", unit: "mm", step: 1 }] },
   { label: "Build", fields: [{ key: "wallThickness", label: "Wall", unit: "mm", step: 0.1 }, { key: "bottomThickness", label: "Bottom", unit: "mm", step: 0.1 }, { key: "cornerRadius", label: "Outer corners", unit: "mm", step: 0.5 }] },
-  { label: "Compartments", fields: [{ key: "columns", label: "Across", step: 1 }, { key: "rows", label: "Down", step: 1 }, { key: "dividerThickness", label: "Divider", unit: "mm", step: 0.1 }] },
+  { label: "Compartments", fields: [{ key: "columns", label: "Across", step: 1 }, { key: "rows", label: "Down", step: 1 }, { key: "dividerThickness", label: "Divider", unit: "mm", step: 0.1 }, { key: "innerCornerRadius", label: "Inside corners", unit: "mm", step: 0.5 }] },
 ];
 
 export function OrganizerEditor({ initialParams = organizerDefaults }: { initialParams?: OrganizerParams }) {
@@ -36,10 +36,6 @@ export function OrganizerEditor({ initialParams = organizerDefaults }: { initial
     <section className="editor" aria-label="Organizer editor">
       <aside className="parameters"><div className="parameterDetails"><div className="panelHeading"><span>Model settings</span><span className="unitLabel">mm</span></div>
         {parameterGroups.map((group) => <section className="parameterGroup" key={group.label}><h2>{group.label}</h2><div className="fieldList">{group.fields.map((field) => <label className="field" key={field.key}><span>{field.label}</span><div className="inputWrap"><input aria-label={field.label} type="number" value={params[field.key]} step={field.step} onChange={(event) => update(field.key, Number(event.target.value))} /><span>{field.unit}</span></div></label>)}</div></section>)}
-        <label className="toggle"><input type="checkbox" checked={params.roundedInside} onChange={(event) => update("roundedInside", event.target.checked)} /><span>Round inside corners</span></label>
-        <label className="toggle"><input type="checkbox" checked={params.stackingLip} onChange={(event) => update("stackingLip", event.target.checked)} /><span>Stacking lip</span></label>
-        <label className="toggle"><input type="checkbox" checked={params.labelTab} onChange={(event) => update("labelTab", event.target.checked)} /><span>Label tab</span></label>
-        <label className="toggle"><input type="checkbox" checked={params.floorHoles} onChange={(event) => update("floorHoles", event.target.checked)} /><span>Floor holes</span></label>
         {error ? <p className="error" role="alert">{error}</p> : <p className="formHint">Changes update the model automatically.</p>}</div></aside>
       <div className="viewerPanel"><div className="viewerToolbar"><div><span className="viewLabel">Live preview</span><p>Drag to orbit · scroll to zoom</p></div><div className="viewerActions"><button className="reset" onClick={() => setResetView((value) => value + 1)}>Reset view</button><label className="wireframe"><input type="checkbox" checked={wireframe} onChange={(event) => setWireframe(event.target.checked)} /> Wireframe</label></div></div><ModelViewport model={model} wireframe={wireframe} resetToken={resetView} /></div>
     </section>

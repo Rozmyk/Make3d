@@ -6,4 +6,7 @@ describe("organizerParamsSchema", () => {
   it("rejects grids without usable compartment space", () => {
     expect(organizerParamsSchema.safeParse({ ...organizerDefaults, width: 40, wallThickness: 6, dividerThickness: 6, columns: 12 }).success).toBe(false);
   });
+  it("rejects an inside corner radius that does not fit the smallest compartment", () => {
+    expect(organizerParamsSchema.safeParse({ ...organizerDefaults, width: 50, depth: 50, columns: 3, rows: 3, innerCornerRadius: 20 }).success).toBe(false);
+  });
 });
