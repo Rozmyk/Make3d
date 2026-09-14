@@ -36,6 +36,7 @@ describe("basic printable models", () => {
     ]);
     for (const model of models) {
       expect(model.metadata.volumeMm3).toBeGreaterThan(0);
+      expect(model.metadata.printability.messages[0]).toMatch(/Watertight mesh verified/);
       expect(model.mesh.indices.length).toBeGreaterThan(0);
       expect(model.mesh.indices.every((index) => index < model.mesh.positions.length / 3)).toBe(true);
     }

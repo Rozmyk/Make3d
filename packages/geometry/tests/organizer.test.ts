@@ -10,6 +10,7 @@ describe("createOrganizer", () => {
     expect(model.metadata.boundingBox.depth).toBeCloseTo(80, 3);
     expect(model.metadata.boundingBox.height).toBeCloseTo(35, 3);
     expect(model.metadata.volumeMm3).toBeGreaterThan(0);
+    expect(model.metadata.printability.messages[0]).toMatch(/Watertight mesh verified/);
   });
   it("supports one row and column", async () => expect((await createOrganizer({ ...organizerDefaults, columns: 1, rows: 1 })).metadata.compartmentCount).toBe(1));
   it("controls inside and outside corner radii independently", async () => {

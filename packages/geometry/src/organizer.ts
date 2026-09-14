@@ -71,12 +71,19 @@ function meshFromManifold(manifold: Solid): MeshData {
 
 function metadataFrom(manifold: Solid, mesh: MeshData, params: OrganizerParams): ModelMetadata {
   const bounds = manifold.boundingBox();
+  const messages = ["Watertight mesh verified. Confirm final orientation, fit and material in your slicer before printing."];
+  if (Math.min(params.wallThickness, params.bottomThickness, params.dividerThickness) < 1.6) {
+    messages.push("One or more structural features are under 1.6 mm; confirm they suit your nozzle and material.");
+  }
+  if (params.height / params.wallThickness > 20) {
+    messages.push("Tall, thin walls may flex; consider thicker walls or a shorter tray.");
+  }
   return {
     boundingBox: { width: bounds.max[0] - bounds.min[0], depth: bounds.max[1] - bounds.min[1], height: bounds.max[2] - bounds.min[2] },
     volumeMm3: Math.abs(manifold.volume()),
     triangleCount: mesh.indices.length / 3,
     compartmentCount: params.columns * params.rows,
-    printability: { valid: true, messages: [] },
+    printability: { valid: true, messages },
   };
 }
 

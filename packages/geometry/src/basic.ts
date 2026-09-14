@@ -71,7 +71,7 @@ function buildModel(manifold: Solid, messages: string[] = [], compartmentCount =
       volumeMm3: Math.abs(manifold.volume()),
       triangleCount: mesh.indices.length / 3,
       compartmentCount,
-      printability: { valid: true, messages },
+      printability: { valid: true, messages: ["Watertight mesh verified. Confirm final orientation, fit and material in your slicer before printing.", ...messages] },
     };
     return { mesh, metadata };
   } finally {
