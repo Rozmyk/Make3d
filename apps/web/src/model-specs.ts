@@ -1,4 +1,4 @@
-import { cableClipDefaults, cableClipParamsSchema, cableDeskOrganizerDefaults, cableDeskOrganizerParamsSchema, pegboardShelfDefaults, pegboardShelfParamsSchema, storageBoxDefaults, storageBoxParamsSchema, underDeskHolderDefaults, underDeskHolderParamsSchema } from "@make3d/validation";
+import { cableClipDefaults, cableClipParamsSchema, cableDeskOrganizerDefaults, cableDeskOrganizerParamsSchema, cableGuideDefaults, cableGuideParamsSchema, pegboardShelfDefaults, pegboardShelfParamsSchema, phoneStandDefaults, phoneStandParamsSchema, storageBoxDefaults, storageBoxParamsSchema, underDeskHolderDefaults, underDeskHolderParamsSchema } from "@make3d/validation";
 import type { SimpleModelSpec } from "./components/simple-model-editor";
 
 export const simpleModelSpecs = {
@@ -19,7 +19,10 @@ export const simpleModelSpecs = {
     filename: "under-desk-cable-channel-screw-mount",
     defaults: cableDeskOrganizerDefaults,
     schema: cableDeskOrganizerParamsSchema,
-    groups: [{ label: "Channel length", fields: [{ key: "length", label: "Length", step: 1 }] }],
+    groups: [
+      { label: "Channel size", fields: [{ key: "length", label: "Length", step: 1 }, { key: "depth", label: "Depth", step: 1 }, { key: "cableDiameter", label: "Largest cable diameter", step: 0.5 }] },
+      { label: "Build", fields: [{ key: "baseThickness", label: "Mounting plate", step: 0.1 }, { key: "backHeight", label: "Channel height", step: 1 }] },
+    ],
   },
   "cable-channel-adhesive": {
     type: "cable-desk-organizer",
@@ -27,7 +30,10 @@ export const simpleModelSpecs = {
     filename: "under-desk-cable-channel-adhesive-mount",
     defaults: { ...cableDeskOrganizerDefaults, mountStyle: "adhesive" },
     schema: cableDeskOrganizerParamsSchema,
-    groups: [{ label: "Channel length", fields: [{ key: "length", label: "Length", step: 1 }] }],
+    groups: [
+      { label: "Channel size", fields: [{ key: "length", label: "Length", step: 1 }, { key: "depth", label: "Depth", step: 1 }, { key: "cableDiameter", label: "Largest cable diameter", step: 0.5 }] },
+      { label: "Build", fields: [{ key: "baseThickness", label: "Mounting plate", step: 0.1 }, { key: "backHeight", label: "Channel height", step: 1 }] },
+    ],
   },
   "compact-cable-organizer": {
     type: "cable-clip",
@@ -58,6 +64,28 @@ export const simpleModelSpecs = {
     defaults: pegboardShelfDefaults,
     schema: pegboardShelfParamsSchema,
     groups: [{ label: "Shelf size", fields: [{ key: "width", label: "Width", step: 1 }, { key: "depth", label: "Depth", step: 1 }] }],
+  },
+  "phone-stand": {
+    type: "phone-stand",
+    title: "Phone Stand",
+    filename: "phone-stand",
+    defaults: phoneStandDefaults,
+    schema: phoneStandParamsSchema,
+    groups: [
+      { label: "Stand size", fields: [{ key: "width", label: "Width", step: 1 }, { key: "depth", label: "Depth", step: 1 }, { key: "height", label: "Height", step: 1 }] },
+      { label: "Device support", fields: [{ key: "baseThickness", label: "Base thickness", step: 0.1 }, { key: "backThickness", label: "Back thickness", step: 0.1 }, { key: "lipHeight", label: "Front lip height", step: 1 }, { key: "lipDepth", label: "Front lip depth", step: 1 }] },
+    ],
+  },
+  "cable-guide": {
+    type: "cable-guide",
+    title: "Open Cable Guide",
+    filename: "open-cable-guide",
+    defaults: cableGuideDefaults,
+    schema: cableGuideParamsSchema,
+    groups: [
+      { label: "Guide size", fields: [{ key: "width", label: "Cable opening", step: 0.5 }, { key: "depth", label: "Depth", step: 1 }, { key: "height", label: "Wall height", step: 1 }] },
+      { label: "Build", fields: [{ key: "wallThickness", label: "Wall thickness", step: 0.1 }, { key: "bottomThickness", label: "Bottom thickness", step: 0.1 }] },
+    ],
   },
 } satisfies Record<string, SimpleModelSpec>;
 
