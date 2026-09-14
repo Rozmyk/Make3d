@@ -70,7 +70,6 @@ export interface StorageBoxParams {
   wallThickness: number;
   lidClearance: number;
   cornerRadius: number;
-  snapLatches: boolean;
 }
 
 export interface MeshData {

@@ -10,7 +10,7 @@ export const simpleModelSpecs = {
     schema: storageBoxParamsSchema,
     groups: [
       { label: "Box size", fields: [{ key: "width", label: "Width", step: 1 }, { key: "depth", label: "Depth", step: 1 }, { key: "height", label: "Height", step: 1 }] },
-      { label: "Build", fields: [{ key: "wallThickness", label: "Wall thickness", step: 0.1 }, { key: "lidClearance", label: "Lid clearance", step: 0.05 }, { key: "cornerRadius", label: "Corner radius", step: 0.5 }, { key: "snapLatches", label: "Add snap latches", type: "toggle" }] },
+      { label: "Build", fields: [{ key: "wallThickness", label: "Wall thickness", step: 0.1 }, { key: "lidClearance", label: "Lid clearance", step: 0.05 }, { key: "cornerRadius", label: "Corner radius", step: 0.5 }] },
     ],
   },
   "cable-channel-screw": {

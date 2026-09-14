@@ -146,7 +146,7 @@ export const underDeskHolderParamsSchema = z.object({
   holeDiameter: millimetres(3, 8),
 });
 
-export const storageBoxDefaults = { width: 120, depth: 80, height: 50, wallThickness: 2.4, lidClearance: 0.35, cornerRadius: 6, snapLatches: false } as const;
+export const storageBoxDefaults = { width: 120, depth: 80, height: 50, wallThickness: 2.4, lidClearance: 0.35, cornerRadius: 6 } as const;
 export const storageBoxParamsSchema = z.object({
   width: millimetres(40, 300),
   depth: millimetres(40, 300),
@@ -154,7 +154,6 @@ export const storageBoxParamsSchema = z.object({
   wallThickness: millimetres(1.2, 6),
   lidClearance: millimetres(0.15, 1.2),
   cornerRadius: millimetres(0, 50),
-  snapLatches: z.boolean(),
 }).superRefine((value, context) => {
   if (value.wallThickness * 2 >= Math.min(value.width, value.depth)) context.addIssue({ code: z.ZodIssueCode.custom, path: ["wallThickness"], message: "Wall thickness leaves no interior space." });
   if (value.wallThickness >= value.height) context.addIssue({ code: z.ZodIssueCode.custom, path: ["wallThickness"], message: "Wall thickness must be less than box height." });

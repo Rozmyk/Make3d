@@ -19,6 +19,36 @@ function cuboid(module: ManifoldToplevel, width: number, depth: number, height: 
   return module.Manifold.cube([width, depth, height], true).translate([x, y, z]);
 }
 
+function roundedRectangle(module: ManifoldToplevel, width: number, depth: number, radius: number) {
+  if (radius <= 0) return module.CrossSection.square([width, depth], true);
+  const segmentsPerCorner = Math.max(2, Math.min(16, Math.ceil(radius / 1.5)));
+  const points: [number, number][] = [];
+  const centers: [number, number, number][] = [
+    [width / 2 - radius, depth / 2 - radius, 0],
+    [-width / 2 + radius, depth / 2 - radius, Math.PI / 2],
+    [-width / 2 + radius, -depth / 2 + radius, Math.PI],
+    [width / 2 - radius, -depth / 2 + radius, Math.PI * 1.5],
+  ];
+  for (const [x, y, startAngle] of centers) {
+    for (let step = 0; step <= segmentsPerCorner; step += 1) {
+      const angle = startAngle + (step / segmentsPerCorner) * (Math.PI / 2);
+      points.push([x + Math.cos(angle) * radius, y + Math.sin(angle) * radius]);
+    }
+  }
+  return new module.CrossSection(points);
+}
+
+function roundedPrism(module: ManifoldToplevel, width: number, depth: number, height: number, radius: number, x = 0, y = 0, z = height / 2): Solid {
+  const boundedRadius = Math.max(0, Math.min(radius, width / 2, depth / 2));
+  if (boundedRadius === 0) return cuboid(module, width, depth, height, x, y, z);
+  const profile = roundedRectangle(module, width, depth, boundedRadius);
+  try {
+    return profile.extrude(height).translate([x, y, z - height / 2]);
+  } finally {
+    profile.delete();
+  }
+}
+
 function meshFromManifold(manifold: Solid): MeshData {
   const mesh = manifold.getMesh();
   const positions = new Float32Array((mesh.vertProperties.length / mesh.numProp) * 3);
@@ -222,28 +252,27 @@ export async function createStorageBox(input: unknown): Promise<GeneratedModel> 
   const lidThickness = wall;
   const outerWidth = params.width + params.lidClearance * 2 + wall * 2;
   const outerDepth = params.depth + params.lidClearance * 2 + wall * 2;
+  const outerRadius = params.cornerRadius + params.lidClearance + wall;
   const lidOffset = (params.width + outerWidth) / 2 + wall * 4;
-  const parts = [
-    // Open box.
-    cuboid(module, params.width, params.depth, wall),
-    cuboid(module, wall, params.depth, params.height, -params.width / 2 + wall / 2, 0, params.height / 2),
-    cuboid(module, wall, params.depth, params.height, params.width / 2 - wall / 2, 0, params.height / 2),
-    cuboid(module, params.width - wall * 2, wall, params.height, 0, -params.depth / 2 + wall / 2, params.height / 2),
-    cuboid(module, params.width - wall * 2, wall, params.height, 0, params.depth / 2 - wall / 2, params.height / 2),
-    // Separate slip-on lid, printed beside the box.
-    cuboid(module, outerWidth, outerDepth, lidThickness, lidOffset, 0, lidThickness / 2),
-    cuboid(module, wall, outerDepth, wall * 2, lidOffset - outerWidth / 2 + wall / 2, 0, lidThickness + wall),
-    cuboid(module, wall, outerDepth, wall * 2, lidOffset + outerWidth / 2 - wall / 2, 0, lidThickness + wall),
-    cuboid(module, outerWidth - wall * 2, wall, wall * 2, lidOffset, -outerDepth / 2 + wall / 2, lidThickness + wall),
-    cuboid(module, outerWidth - wall * 2, wall, wall * 2, lidOffset, outerDepth / 2 - wall / 2, lidThickness + wall),
-  ];
-  if (params.snapLatches) {
-    parts.push(cuboid(module, wall * 2, wall * 2, wall * 2, lidOffset - outerWidth / 2 - wall / 2, 0, lidThickness + wall));
-    parts.push(cuboid(module, wall * 2, wall * 2, wall * 2, lidOffset + outerWidth / 2 + wall / 2, 0, lidThickness + wall));
-  }
+  const boxOuter = roundedPrism(module, params.width, params.depth, params.height, params.cornerRadius);
+  const boxInner = roundedPrism(module, params.width - wall * 2, params.depth - wall * 2, params.height - wall + 0.04, Math.max(0, params.cornerRadius - wall), 0, 0, wall + (params.height - wall + 0.04) / 2);
+  const lidTop = roundedPrism(module, outerWidth, outerDepth, lidThickness, outerRadius, lidOffset);
+  const lidRimOuter = roundedPrism(module, outerWidth, outerDepth, wall * 2, outerRadius, lidOffset, 0, lidThickness + wall);
+  const lidRimInner = roundedPrism(module, outerWidth - wall * 2, outerDepth - wall * 2, wall * 2 + 0.04, Math.max(0, outerRadius - wall), lidOffset, 0, lidThickness + wall - 0.02);
   try {
-    return buildModel(module.Manifold.union(parts), ["The lid is generated beside the box so both parts export in one STL.", params.snapLatches ? "Two small retention tabs are included on the lid." : "Use the configured clearance for a smooth slip-on lid."]);
+    const box = module.Manifold.difference([boxOuter, boxInner]);
+    const lidRim = module.Manifold.difference([lidRimOuter, lidRimInner]);
+    try {
+      return buildModel(module.Manifold.union([box, lidTop, lidRim]), ["The lid is generated beside the box so both parts export in one STL.", "Use the configured clearance for a smooth slip-on lid."]);
+    } finally {
+      box.delete();
+      lidRim.delete();
+    }
   } finally {
-    parts.forEach((part) => part.delete());
+    boxOuter.delete();
+    boxInner.delete();
+    lidTop.delete();
+    lidRimOuter.delete();
+    lidRimInner.delete();
   }
 }

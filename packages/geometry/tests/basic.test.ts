@@ -46,6 +46,13 @@ describe("basic printable models", () => {
     expect(model.metadata.boundingBox.width).toBeGreaterThan(storageBoxDefaults.width * 2);
   });
 
+  it("applies the configured storage-box corner radius to both box and lid", async () => {
+    const square = await createStorageBox({ ...storageBoxDefaults, cornerRadius: 0 });
+    const rounded = await createStorageBox({ ...storageBoxDefaults, cornerRadius: 14 });
+    expect(rounded.metadata.volumeMm3).not.toBeCloseTo(square.metadata.volumeMm3, 3);
+    expect(rounded.metadata.triangleCount).toBeGreaterThan(square.metadata.triangleCount);
+  });
+
   it("matches the compact cable organizer reference envelope", async () => {
     const model = await createCableClip(cableClipDefaults);
     expect(model.metadata.boundingBox.width).toBeCloseTo(73.2, 1);
