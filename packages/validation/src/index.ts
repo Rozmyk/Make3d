@@ -11,6 +11,9 @@ export const organizerDefaults = {
   rows: 2,
   dividerThickness: 2,
   roundedInside: true,
+  stackingLip: false,
+  labelTab: false,
+  floorHoles: false,
 } as const;
 
 const millimetres = (min: number, max: number) =>
@@ -28,6 +31,9 @@ export const organizerParamsSchema = z
     rows: z.coerce.number().int().min(1).max(12),
     dividerThickness: millimetres(1.2, 6),
     roundedInside: z.boolean(),
+    stackingLip: z.boolean(),
+    labelTab: z.boolean(),
+    floorHoles: z.boolean(),
   })
   .superRefine((value, context) => {
     const innerWidth = value.width - 2 * value.wallThickness;

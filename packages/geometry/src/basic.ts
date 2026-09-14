@@ -220,9 +220,9 @@ export async function createStorageBox(input: unknown): Promise<GeneratedModel> 
   const module = await getManifold();
   const wall = params.wallThickness;
   const lidThickness = wall;
-  const lidOffset = params.width * 0.65 + wall * 4;
   const outerWidth = params.width + params.lidClearance * 2 + wall * 2;
   const outerDepth = params.depth + params.lidClearance * 2 + wall * 2;
+  const lidOffset = (params.width + outerWidth) / 2 + wall * 4;
   const parts = [
     // Open box.
     cuboid(module, params.width, params.depth, wall),

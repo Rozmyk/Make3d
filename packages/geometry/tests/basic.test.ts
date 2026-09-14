@@ -41,6 +41,11 @@ describe("basic printable models", () => {
     }
   });
 
+  it("keeps the storage-box lid separate from the box in the exported mesh", async () => {
+    const model = await createStorageBox(storageBoxDefaults);
+    expect(model.metadata.boundingBox.width).toBeGreaterThan(storageBoxDefaults.width * 2);
+  });
+
   it("matches the compact cable organizer reference envelope", async () => {
     const model = await createCableClip(cableClipDefaults);
     expect(model.metadata.boundingBox.width).toBeCloseTo(73.2, 1);

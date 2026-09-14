@@ -29,7 +29,7 @@ function Mesh({ model, wireframe, color }: { model: GeneratedModel; wireframe: b
     return next;
   }, [model]);
   useEffect(() => () => geometry.dispose(), [geometry]);
-  return <mesh geometry={geometry}><meshStandardMaterial color={color} roughness={0.82} metalness={0} flatShading={true} wireframe={wireframe} /></mesh>;
+  return <mesh geometry={geometry}><meshStandardMaterial color={color} roughness={0.82} metalness={0} wireframe={wireframe} /></mesh>;
 }
 
 function CameraFit({ model, resetToken }: { model: GeneratedModel; resetToken: number }) {
@@ -44,11 +44,11 @@ function CameraFit({ model, resetToken }: { model: GeneratedModel; resetToken: n
   return <OrbitControls ref={controls} makeDefault enableDamping dampingFactor={0.08} />;
 }
 
-export function ModelViewport({ model, wireframe, resetToken }: { model?: GeneratedModel; wireframe: boolean; resetToken: number }) {
+export function ModelViewport({ model, wireframe, resetToken, compact = false }: { model?: GeneratedModel; wireframe: boolean; resetToken: number; compact?: boolean }) {
   const [colors, setColors] = useState<{ canvas: THREE.Color; model: THREE.Color; grid: THREE.Color; gridStrong: THREE.Color } | null>(null);
   useEffect(() => {
     setColors({ canvas: readColorToken("--color-canvas"), model: readColorToken("--color-model-3d"), grid: readColorToken("--color-grid"), gridStrong: readColorToken("--color-grid-strong") });
   }, []);
-  if (!colors) return <div className="canvasWrap" />;
-  return <div className="canvasWrap"><Canvas camera={{ position: [120, 100, 120], fov: 38 }}><color attach="background" args={[colors.canvas]} /><ambientLight intensity={1.05} /><directionalLight position={[100, 160, 80]} intensity={1.15} /><directionalLight position={[-80, 70, -120]} intensity={0.55} /><Grid args={[400, 400]} cellSize={10} cellThickness={0.6} sectionSize={50} sectionThickness={1.1} cellColor={colors.grid} sectionColor={colors.gridStrong} fadeDistance={450} />{model ? <><Mesh model={model} wireframe={wireframe} color={colors.model} /><CameraFit model={model} resetToken={resetToken} /></> : null}</Canvas></div>;
+  if (!colors) return <div className={`canvasWrap ${compact ? "canvasWrap--thumbnail" : ""}`} />;
+  return <div className={`canvasWrap ${compact ? "canvasWrap--thumbnail" : ""}`}><Canvas camera={{ position: [120, 100, 120], fov: compact ? 34 : 38 }}><color attach="background" args={[colors.canvas]} /><ambientLight intensity={1.05} /><directionalLight position={[100, 160, 80]} intensity={1.15} /><directionalLight position={[-80, 70, -120]} intensity={0.55} /><Grid args={[400, 400]} cellSize={10} cellThickness={0.6} sectionSize={50} sectionThickness={1.1} cellColor={colors.grid} sectionColor={colors.gridStrong} fadeDistance={450} />{model ? <><Mesh model={model} wireframe={wireframe} color={colors.model} /><CameraFit model={model} resetToken={resetToken} /></> : null}</Canvas></div>;
 }

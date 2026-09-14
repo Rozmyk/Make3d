@@ -85,6 +85,8 @@ export async function createOrganizer(input: unknown): Promise<GeneratedModel> {
   const module = await getManifold();
   const outer = makePrism(module, params.width, params.depth, params.height, params.cornerRadius);
   const cavities: Solid[] = [];
+  const cutouts: Solid[] = [];
+  const additions: Solid[] = [];
   try {
     const innerWidth = params.width - 2 * params.wallThickness;
     const innerDepth = params.depth - 2 * params.wallThickness;
@@ -99,17 +101,53 @@ export async function createOrganizer(input: unknown): Promise<GeneratedModel> {
         cavities.push(cavity);
       }
     }
-    const result = module.Manifold.difference([outer, ...cavities]);
+    if (params.floorHoles) {
+      const holeRadius = Math.min(2.4, Math.max(1.2, params.wallThickness * 0.72));
+      const inset = Math.max(params.wallThickness + holeRadius + 2, 8);
+      const holes: [number, number][] = [
+        [-params.width / 2 + inset, -params.depth / 2 + inset],
+        [-params.width / 2 + inset, params.depth / 2 - inset],
+        [params.width / 2 - inset, -params.depth / 2 + inset],
+        [params.width / 2 - inset, params.depth / 2 - inset],
+      ];
+      holes.forEach(([x, y]) => cutouts.push(module.Manifold.cylinder(params.bottomThickness + 0.04, holeRadius, holeRadius, 20).translate([x, y, -0.02])));
+    }
+
+    if (params.stackingLip) {
+      const lipHeight = Math.min(2.4, Math.max(1.2, params.wallThickness));
+      const lipOffset = Math.max(0.8, params.wallThickness * 0.45);
+      const lipOuter = makePrism(module, params.width + lipOffset * 2, params.depth + lipOffset * 2, lipHeight, params.cornerRadius + lipOffset, params.height);
+      const lipInner = makePrism(module, params.width, params.depth, lipHeight + 0.04, params.cornerRadius, params.height - 0.02);
+      try {
+        additions.push(module.Manifold.difference([lipOuter, lipInner]));
+      } finally {
+        lipOuter.delete();
+        lipInner.delete();
+      }
+    }
+
+    if (params.labelTab) {
+      additions.push(makePrism(module, Math.min(32, params.width * 0.32), Math.max(1.6, params.wallThickness), Math.min(18, params.height * 0.5), 1.2, params.height - Math.min(18, params.height * 0.5) / 2).translate([0, -params.depth / 2 - params.wallThickness / 2, 0]));
+    }
+
+    const result = module.Manifold.difference([outer, ...cavities, ...cutouts]);
     try {
-      if (result.status() !== "NoError") throw new GeometryGenerationError(`Manifold failed: ${result.status()}`);
-      const mesh = meshFromManifold(result);
+      const finalModel = additions.length ? module.Manifold.union([result, ...additions]) : result;
+      try {
+      if (finalModel.status() !== "NoError") throw new GeometryGenerationError(`Manifold failed: ${finalModel.status()}`);
+      const mesh = meshFromManifold(finalModel);
       if (mesh.indices.length === 0 || mesh.positions.some((value) => !Number.isFinite(value))) throw new GeometryGenerationError("Generated mesh is empty or contains invalid vertices.");
-      return { mesh, metadata: metadataFrom(result, mesh, params) };
+      return { mesh, metadata: metadataFrom(finalModel, mesh, params) };
+      } finally {
+        if (finalModel !== result) finalModel.delete();
+      }
     } finally {
       result.delete();
     }
   } finally {
     outer.delete();
     cavities.forEach((cavity) => cavity.delete());
+    cutouts.forEach((cutout) => cutout.delete());
+    additions.forEach((addition) => addition.delete());
   }
 }

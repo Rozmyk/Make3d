@@ -11,6 +11,9 @@ export interface OrganizerParams {
   rows: number;
   dividerThickness: number;
   roundedInside: boolean;
+  stackingLip: boolean;
+  labelTab: boolean;
+  floorHoles: boolean;
 }
 
 export interface PhoneStandParams {
