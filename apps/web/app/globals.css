@@ -1515,6 +1515,64 @@ a.projectCard { color: inherit; text-decoration: none; }
   border-radius: 0;
 }
 
+/* Hallmark · component: model catalogue card · genre: atmospheric · theme: existing black instrument
+ * states: default · hover · focus · active · disabled · loading · error · success
+ * contrast: pass (40–41)
+ */
+/* A card is a model specimen first: one quiet stage, a pinned size label, then its name. */
+.projectsHome .projectCard--technical {
+  position: relative;
+  display: flex;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.projectsHome .projectCard--technical .projectThumbnail--model {
+  order: 0;
+  width: 100%;
+  max-width: none;
+  height: clamp(14rem, 38vw, 18rem);
+  margin: 0;
+  border: 0;
+  border-bottom: 1px solid var(--color-rule);
+  border-radius: 0;
+  background: var(--color-canvas);
+}
+
+.projectsHome .projectCard--technical .canvasWrap--thumbnail {
+  background: var(--color-canvas);
+  box-shadow: none;
+}
+
+.projectsHome .projectCard--technical .projectTechnicalBadge {
+  position: absolute;
+  z-index: 1;
+  top: var(--space-3);
+  left: var(--space-3);
+  margin: 0;
+  background: var(--color-paper);
+}
+
+.projectsHome .projectCard--technical strong {
+  order: 1;
+  display: block;
+  width: 100%;
+  padding: var(--space-4);
+  color: var(--color-ink);
+  font-size: 1.05rem;
+  line-height: 1.2;
+}
+
+.projectsHome .projectCard--technical:hover .projectThumbnail--model,
+.projectsHome .projectCard--technical:focus-visible .projectThumbnail--model {
+  background: var(--color-panel);
+}
+
+@media (max-width: 39.99rem) {
+  .projectsHome .projectCard--technical .projectThumbnail--model { height: clamp(13rem, 66vw, 17rem); }
+}
+
 .workbench {
   background-color: var(--color-paper);
   background-image: none;
