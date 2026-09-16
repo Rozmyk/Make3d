@@ -45,7 +45,7 @@ function CameraFit({ model, resetToken, interactive, compact }: { model: Generat
     const center = bounds.getCenter(new THREE.Vector3());
     const diagonal = bounds.getSize(new THREE.Vector3()).length();
     const fieldOfView = THREE.MathUtils.degToRad((camera as THREE.PerspectiveCamera).fov);
-    const distance = Math.max(40, diagonal / (2 * Math.tan(fieldOfView / 2)) * (compact ? 1.22 : 1.08));
+    const distance = Math.max(40, diagonal / (2 * Math.tan(fieldOfView / 2)) * (compact ? 0.9 : 1.08));
     camera.position.copy(center).add(new THREE.Vector3(0.64, 0.54, 0.64).normalize().multiplyScalar(distance));
     camera.near = Math.max(0.1, distance / 100);
     camera.far = distance * 20;
