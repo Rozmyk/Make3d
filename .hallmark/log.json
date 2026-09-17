@@ -1,5 +1,61 @@
 [
   {
+    "date": "2026-09-17",
+    "macrostructure": "Narrative Workflow",
+    "theme": "studied-DNA (source: Calendly references)",
+    "enrichment": "live Three.js model on a cobalt render scene",
+    "brief": "Make3D landing rebuilt around actual 3D models, with the loading mockup removed and a restrained cobalt system"
+  },
+  {
+    "date": "2026-09-17",
+    "macrostructure": "Feature Stack",
+    "theme": "studied-DNA (source: Calendly references)",
+    "enrichment": "scroll-synchronised live Three.js model preview",
+    "brief": "Make3D landing refined with an active step stack, pinned model panel and restrained cobalt spectrum"
+  },
+  {
+    "date": "2026-09-17",
+    "macrostructure": "studied-DNA / Calendly product landing",
+    "theme": "studied-DNA (source: https://calendly.com/)",
+    "enrichment": "live Three.js model preview",
+    "brief": "Make3D landing, library and generators rebuilt from Calendly-inspired product-surface DNA"
+  },
+  {
+    "date": "2026-09-17",
+    "macrostructure": "Ecosystem Index",
+    "theme": "Cobalt",
+    "enrichment": "live Three.js model preview",
+    "brief": "Make3D rebuilt as a physical-parts catalogue and fitting station"
+  },
+  {
+    "date": "2026-09-10",
+    "macrostructure": "Bento Grid",
+    "theme": "black instrument",
+    "enrichment": "live Three.js model preview",
+    "brief": "Full Make3D redesign with a dark technical component catalogue and matching generators"
+  },
+  {
+    "date": "2026-09-10",
+    "macrostructure": "Workbench",
+    "theme": "studied-DNA (Tally reference)",
+    "enrichment": "live Three.js organizer preview",
+    "brief": "Unified dark project console with validated desk-organizer presets"
+  },
+  {
+    "date": "2026-09-10",
+    "macrostructure": "Workbench",
+    "theme": "Coral",
+    "enrichment": "Tier B inline SVG organizer specimen",
+    "brief": "Focused homepage for a single, finished organizer generator"
+  },
+  {
+    "date": "2026-09-10",
+    "macrostructure": "Catalogue",
+    "theme": "Hum",
+    "enrichment": "Tier B inline SVG model specimens",
+    "brief": "Friendly hobbyist model picker with useful printable model thumbnails"
+  },
+  {
     "date": "2026-09-09",
     "macrostructure": "Fixed Workbench",
     "theme": "Night Workshop",
