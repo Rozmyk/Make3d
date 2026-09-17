@@ -1,6 +1,6 @@
 "use client";
 
-import { Grid, OrbitControls } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import { Canvas, useThree } from "@react-three/fiber";
 import type { GeneratedModel } from "@make3d/types";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -30,7 +30,9 @@ function Mesh({ model, wireframe, color }: { model: GeneratedModel; wireframe: b
     return next;
   }, [model]);
   useEffect(() => () => geometry.dispose(), [geometry]);
-  return <mesh geometry={geometry}><meshStandardMaterial color={color} roughness={0.74} metalness={0} wireframe={wireframe} /></mesh>;
+  // Generated solids deliberately have sharp print edges. Averaging normals across
+  // indexed faces creates false gradients on coplanar surfaces around holes.
+  return <mesh geometry={geometry}><meshStandardMaterial color={color} roughness={0.74} metalness={0} flatShading wireframe={wireframe} /></mesh>;
 }
 
 function CameraFit({ model, resetToken, interactive, compact, fitScale, autoRotate }: { model: GeneratedModel; resetToken: number; interactive: boolean; compact: boolean; fitScale: number; autoRotate: boolean }) {
@@ -58,10 +60,10 @@ function CameraFit({ model, resetToken, interactive, compact, fitScale, autoRota
 }
 
 export function ModelViewport({ model, wireframe, resetToken, compact = false, transparent = false, fitScale = 1.12, autoRotate = false, modelColorToken }: { model?: GeneratedModel; wireframe: boolean; resetToken: number; compact?: boolean; transparent?: boolean; fitScale?: number; autoRotate?: boolean; modelColorToken?: string }) {
-  const [colors, setColors] = useState<{ canvas: THREE.Color; model: THREE.Color; grid: THREE.Color; gridStrong: THREE.Color } | null>(null);
+  const [colors, setColors] = useState<{ canvas: THREE.Color; model: THREE.Color } | null>(null);
   const [reduceMotion, setReduceMotion] = useState(false);
   useEffect(() => {
-    setColors({ canvas: readColorToken("--color-canvas"), model: readColorToken(modelColorToken ?? "--color-model-3d"), grid: readColorToken("--color-grid"), gridStrong: readColorToken("--color-grid-strong") });
+    setColors({ canvas: readColorToken("--color-canvas"), model: readColorToken(modelColorToken ?? "--color-model-3d") });
   }, [modelColorToken]);
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -71,5 +73,5 @@ export function ModelViewport({ model, wireframe, resetToken, compact = false, t
   }, []);
   if (!colors) return <div className={`canvasWrap ${compact ? "canvasWrap--thumbnail" : ""}`} />;
   const shouldRotate = autoRotate && !reduceMotion;
-  return <div className={`canvasWrap ${compact ? "canvasWrap--thumbnail" : ""}`}><Canvas gl={{ alpha: transparent }} dpr={compact ? [1, 1.5] : [1, 2]} frameloop={shouldRotate || !compact ? "always" : "demand"} camera={{ position: [120, 100, 120], fov: compact ? 34 : 38 }}>{!transparent && <color attach="background" args={[colors.canvas]} />}<ambientLight intensity={0.86} /><directionalLight position={[100, 160, 80]} intensity={1.02} /><directionalLight position={[-80, 70, -120]} intensity={0.16} />{!compact && <Grid args={[400, 400]} position={[0, -0.25, 0]} cellSize={10} cellThickness={0.6} sectionSize={50} sectionThickness={1.1} cellColor={colors.grid} sectionColor={colors.gridStrong} fadeDistance={450} />}{model ? <><Mesh model={model} wireframe={wireframe} color={colors.model} /><CameraFit model={model} resetToken={resetToken} interactive={!compact} compact={compact} fitScale={fitScale} autoRotate={shouldRotate} /></> : null}</Canvas></div>;
+  return <div className={`canvasWrap ${compact ? "canvasWrap--thumbnail" : ""}`}><Canvas gl={{ alpha: transparent }} dpr={compact ? [1, 1.5] : [1, 2]} frameloop={shouldRotate || !compact ? "always" : "demand"} camera={{ position: [120, 100, 120], fov: compact ? 34 : 38 }}>{!transparent && <color attach="background" args={[colors.canvas]} />}<ambientLight intensity={0.86} /><directionalLight position={[100, 160, 80]} intensity={1.02} /><directionalLight position={[-80, 70, -120]} intensity={0.16} />{model ? <><Mesh model={model} wireframe={wireframe} color={colors.model} /><CameraFit model={model} resetToken={resetToken} interactive={!compact} compact={compact} fitScale={fitScale} autoRotate={shouldRotate} /></> : null}</Canvas></div>;
 }

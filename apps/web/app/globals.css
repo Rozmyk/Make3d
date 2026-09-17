@@ -188,7 +188,7 @@
 @media(max-width:39.99rem){.projectsHome .landingHeroVisual::before{right:-14%;bottom:10%;width:100%;height:36%}}
 
 /* The editor is a work surface: subdued grid first, then one readable model colour. */
-.projectsHome{--color-canvas:var(--maker-canvas);--color-grid:var(--maker-rule);--color-grid-strong:var(--maker-rule-strong);--color-model:var(--maker-blue-deep);--color-model-3d:var(--maker-blue-deep)}
+.projectsHome{--color-canvas:var(--maker-canvas);--color-grid:var(--maker-rule);--color-grid-strong:var(--maker-rule-strong);--color-model:var(--maker-blue-deep);--color-model-3d:oklch(68% .065 235)}
 
 /* Editors deserve a broader work surface; export belongs next to the resulting preview. */
 .workbench .floatingNav,.workbenchIdentity,.workbench .editor,.workbench .inspector{width:min(100%,100rem)}
