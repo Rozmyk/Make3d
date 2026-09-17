@@ -1,4 +1,4 @@
-export type GeneratorType = "organizer" | "phone-stand" | "cable-guide" | "cable-desk-organizer" | "pegboard-shelf" | "cable-clip" | "under-desk-holder" | "storage-box";
+export type GeneratorType = "organizer" | "phone-stand" | "cable-guide" | "cable-desk-organizer" | "pegboard-shelf" | "cable-clip" | "under-desk-holder" | "storage-box" | "spacer" | "washer" | "cable-grommet" | "screw-cover" | "l-bracket";
 
 export interface OrganizerParams {
   width: number;
@@ -67,6 +67,50 @@ export interface StorageBoxParams {
   wallThickness: number;
   lidClearance: number;
   cornerRadius: number;
+}
+
+export interface SpacerParams {
+  outerDiameter: number;
+  height: number;
+  holeDiameter: number;
+  flangeDiameter: number;
+  flangeHeight: number;
+}
+
+export interface WasherParams {
+  outerDiameter: number;
+  holeDiameter: number;
+  thickness: number;
+  style: "flat" | "countersunk";
+  countersinkDiameter: number;
+  countersinkDepth: number;
+}
+
+export interface CableGrommetParams {
+  cutoutDiameter: number;
+  openingDiameter: number;
+  deskThickness: number;
+  flangeDiameter: number;
+  flangeThickness: number;
+}
+
+export interface ScrewCoverParams {
+  screwHeadDiameter: number;
+  screwHeadHeight: number;
+  wallThickness: number;
+  topThickness: number;
+  clearance: number;
+}
+
+export interface LBracketParams {
+  width: number;
+  horizontalLength: number;
+  verticalLength: number;
+  thickness: number;
+  holeDiameter: number;
+  edgeOffset: number;
+  horizontalHoleCount: number;
+  verticalHoleCount: number;
 }
 
 export interface MeshData {

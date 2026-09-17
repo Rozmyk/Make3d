@@ -6,12 +6,17 @@ describe("simple model catalogue", () => {
     expect(Object.keys(simpleModelSpecs).sort()).toEqual([
       "cable-channel-adhesive",
       "cable-channel-screw",
+      "cable-grommet",
       "cable-guide",
       "compact-cable-organizer",
+      "l-bracket",
       "pegboard-shelf",
       "phone-stand",
+      "screw-cover",
+      "spacer",
       "storage-box",
       "under-desk-holder",
+      "washer",
     ]);
   });
 

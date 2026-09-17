@@ -29,7 +29,7 @@ function Mesh({ model, wireframe, color }: { model: GeneratedModel; wireframe: b
     return next;
   }, [model]);
   useEffect(() => () => geometry.dispose(), [geometry]);
-  return <mesh geometry={geometry}><meshStandardMaterial color={color} roughness={0.82} metalness={0} wireframe={wireframe} /></mesh>;
+  return <mesh geometry={geometry}><meshStandardMaterial color={color} roughness={0.82} metalness={0} flatShading wireframe={wireframe} /></mesh>;
 }
 
 function CameraFit({ model, resetToken, interactive, compact }: { model: GeneratedModel; resetToken: number; interactive: boolean; compact: boolean }) {

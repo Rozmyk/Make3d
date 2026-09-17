@@ -1,3 +1,3 @@
 export { createOrganizer, GeometryGenerationError } from "./organizer";
-export { createCableClip, createCableDeskOrganizer, createCableGuide, createPegboardShelf, createPhoneStand, createStorageBox, createUnderDeskHolder } from "./basic";
+export { createCableClip, createCableDeskOrganizer, createCableGuide, createCableGrommet, createLBracket, createPegboardShelf, createPhoneStand, createScrewCover, createSpacer, createStorageBox, createUnderDeskHolder, createWasher } from "./basic";
 export { exportBinaryStl } from "./stl";

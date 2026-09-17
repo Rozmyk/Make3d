@@ -156,3 +156,69 @@ export const storageBoxParamsSchema = z.object({
   if (value.wallThickness >= value.height) context.addIssue({ code: z.ZodIssueCode.custom, path: ["wallThickness"], message: "Wall thickness must be less than box height." });
   if (value.cornerRadius > Math.min(value.width, value.depth) / 2) context.addIssue({ code: z.ZodIssueCode.custom, path: ["cornerRadius"], message: "Corner radius is too large for these dimensions." });
 });
+
+export const spacerDefaults = { outerDiameter: 18, height: 12, holeDiameter: 4.2, flangeDiameter: 0, flangeHeight: 0 } as const;
+export const spacerParamsSchema = z.object({
+  outerDiameter: millimetres(8, 100),
+  height: millimetres(2, 100),
+  holeDiameter: millimetres(0, 80),
+  flangeDiameter: millimetres(0, 140),
+  flangeHeight: millimetres(0, 20),
+}).superRefine((value, context) => {
+  if (value.holeDiameter >= value.outerDiameter - 2) context.addIssue({ code: z.ZodIssueCode.custom, path: ["holeDiameter"], message: "Hole diameter must leave at least a 1 mm wall." });
+  if (value.flangeDiameter > 0 && value.flangeDiameter < value.outerDiameter) context.addIssue({ code: z.ZodIssueCode.custom, path: ["flangeDiameter"], message: "Flange diameter must be at least the spacer diameter, or 0 to disable it." });
+  if (value.flangeDiameter === 0 && value.flangeHeight > 0) context.addIssue({ code: z.ZodIssueCode.custom, path: ["flangeHeight"], message: "Set a flange diameter before adding flange height." });
+  if (value.flangeHeight >= value.height) context.addIssue({ code: z.ZodIssueCode.custom, path: ["flangeHeight"], message: "Flange height must be less than total height." });
+});
+
+export const washerDefaults = { outerDiameter: 20, holeDiameter: 4.2, thickness: 2, style: "flat", countersinkDiameter: 8.4, countersinkDepth: 1.2 } as const;
+export const washerParamsSchema = z.object({
+  outerDiameter: millimetres(8, 120),
+  holeDiameter: millimetres(1, 80),
+  thickness: millimetres(0.8, 12),
+  style: z.enum(["flat", "countersunk"]),
+  countersinkDiameter: millimetres(2, 100),
+  countersinkDepth: millimetres(0.1, 10),
+}).superRefine((value, context) => {
+  if (value.holeDiameter >= value.outerDiameter - 2) context.addIssue({ code: z.ZodIssueCode.custom, path: ["holeDiameter"], message: "Hole diameter must leave at least a 1 mm rim." });
+  if (value.style === "countersunk" && value.countersinkDiameter <= value.holeDiameter) context.addIssue({ code: z.ZodIssueCode.custom, path: ["countersinkDiameter"], message: "Countersink diameter must exceed the hole diameter." });
+  if (value.style === "countersunk" && value.countersinkDiameter >= value.outerDiameter - 2) context.addIssue({ code: z.ZodIssueCode.custom, path: ["countersinkDiameter"], message: "Countersink diameter must leave at least a 1 mm rim." });
+  if (value.style === "countersunk" && value.countersinkDepth >= value.thickness) context.addIssue({ code: z.ZodIssueCode.custom, path: ["countersinkDepth"], message: "Countersink depth must be less than washer thickness." });
+});
+
+export const cableGrommetDefaults = { cutoutDiameter: 60, openingDiameter: 36, deskThickness: 25, flangeDiameter: 76, flangeThickness: 3 } as const;
+export const cableGrommetParamsSchema = z.object({
+  cutoutDiameter: millimetres(20, 120),
+  openingDiameter: millimetres(8, 100),
+  deskThickness: millimetres(8, 60),
+  flangeDiameter: millimetres(28, 150),
+  flangeThickness: millimetres(1.2, 8),
+}).superRefine((value, context) => {
+  if (value.openingDiameter >= value.cutoutDiameter - 2) context.addIssue({ code: z.ZodIssueCode.custom, path: ["openingDiameter"], message: "Opening must leave at least a 1 mm sleeve wall." });
+  if (value.flangeDiameter < value.cutoutDiameter + 4) context.addIssue({ code: z.ZodIssueCode.custom, path: ["flangeDiameter"], message: "Flange must overlap the desk cutout by at least 2 mm on each side." });
+});
+
+export const screwCoverDefaults = { screwHeadDiameter: 9, screwHeadHeight: 3, wallThickness: 1.6, topThickness: 1.4, clearance: 0.25 } as const;
+export const screwCoverParamsSchema = z.object({
+  screwHeadDiameter: millimetres(3, 30),
+  screwHeadHeight: millimetres(1, 15),
+  wallThickness: millimetres(1.2, 5),
+  topThickness: millimetres(1, 5),
+  clearance: millimetres(0.1, 1),
+});
+
+export const lBracketDefaults = { width: 50, horizontalLength: 45, verticalLength: 45, thickness: 3, holeDiameter: 4.2, edgeOffset: 8, horizontalHoleCount: 2, verticalHoleCount: 2 } as const;
+export const lBracketParamsSchema = z.object({
+  width: millimetres(20, 180),
+  horizontalLength: millimetres(20, 180),
+  verticalLength: millimetres(20, 180),
+  thickness: millimetres(2, 10),
+  holeDiameter: millimetres(2, 12),
+  edgeOffset: millimetres(3, 40),
+  horizontalHoleCount: z.coerce.number().int().min(1).max(4),
+  verticalHoleCount: z.coerce.number().int().min(1).max(4),
+}).superRefine((value, context) => {
+  if (value.holeDiameter >= Math.min(value.width, value.horizontalLength, value.verticalLength) - 4) context.addIssue({ code: z.ZodIssueCode.custom, path: ["holeDiameter"], message: "Hole diameter is too large for this bracket." });
+  if (value.edgeOffset + value.holeDiameter / 2 > value.horizontalLength - value.thickness) context.addIssue({ code: z.ZodIssueCode.custom, path: ["edgeOffset"], message: "Horizontal hole margin leaves no room on this leg." });
+  if (value.edgeOffset + value.holeDiameter / 2 > value.verticalLength) context.addIssue({ code: z.ZodIssueCode.custom, path: ["edgeOffset"], message: "Vertical hole margin leaves no room on this leg." });
+});

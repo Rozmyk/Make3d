@@ -1,5 +1,5 @@
-import type { CableClipParams, CableDeskOrganizerParams, CableGuideParams, GeneratedModel, MeshData, ModelMetadata, PegboardShelfParams, PhoneStandParams, StorageBoxParams, UnderDeskHolderParams } from "@make3d/types";
-import { cableClipParamsSchema, cableDeskOrganizerParamsSchema, cableGuideParamsSchema, pegboardShelfParamsSchema, phoneStandParamsSchema, storageBoxParamsSchema, underDeskHolderParamsSchema } from "@make3d/validation";
+import type { CableClipParams, CableDeskOrganizerParams, CableGuideParams, CableGrommetParams, GeneratedModel, LBracketParams, MeshData, ModelMetadata, PegboardShelfParams, PhoneStandParams, ScrewCoverParams, SpacerParams, StorageBoxParams, UnderDeskHolderParams, WasherParams } from "@make3d/types";
+import { cableClipParamsSchema, cableDeskOrganizerParamsSchema, cableGuideParamsSchema, cableGrommetParamsSchema, lBracketParamsSchema, pegboardShelfParamsSchema, phoneStandParamsSchema, screwCoverParamsSchema, spacerParamsSchema, storageBoxParamsSchema, underDeskHolderParamsSchema, washerParamsSchema } from "@make3d/validation";
 import createManifold, { type ManifoldToplevel } from "manifold-3d";
 import { GeometryGenerationError } from "./organizer";
 
@@ -273,5 +273,107 @@ export async function createStorageBox(input: unknown): Promise<GeneratedModel> 
     lidTop.delete();
     lidRimOuter.delete();
     lidRimInner.delete();
+  }
+}
+
+export async function createSpacer(input: unknown): Promise<GeneratedModel> {
+  const params: SpacerParams = spacerParamsSchema.parse(input);
+  const module = await getManifold();
+  const outer = module.Manifold.cylinder(params.height, params.outerDiameter / 2, params.outerDiameter / 2, 48);
+  const flange = params.flangeDiameter > 0 && params.flangeHeight > 0
+    ? module.Manifold.cylinder(params.flangeHeight, params.flangeDiameter / 2, params.flangeDiameter / 2, 48)
+    : undefined;
+  const hole = params.holeDiameter > 0
+    ? module.Manifold.cylinder(params.height + 0.04, params.holeDiameter / 2, params.holeDiameter / 2, 48).translate([0, 0, -0.02])
+    : undefined;
+  try {
+    const body = module.Manifold.union(flange ? [outer, flange] : [outer]);
+    const result = hole ? module.Manifold.difference([body, hole]) : body;
+    if (hole) body.delete();
+    return buildModel(result, [
+      params.holeDiameter > 0 ? "The central hole is sized for your chosen fastener or rod." : "This is a solid spacer with no central hole.",
+      flange ? "The optional flange spreads the load across the mounting surface." : "Set the flange dimensions to 0 for a straight cylindrical spacer.",
+    ]);
+  } finally {
+    outer.delete();
+    flange?.delete();
+    hole?.delete();
+  }
+}
+
+export async function createWasher(input: unknown): Promise<GeneratedModel> {
+  const params: WasherParams = washerParamsSchema.parse(input);
+  const module = await getManifold();
+  const outer = module.Manifold.cylinder(params.thickness, params.outerDiameter / 2, params.outerDiameter / 2, 48);
+  const hole = module.Manifold.cylinder(params.thickness + 0.04, params.holeDiameter / 2, params.holeDiameter / 2, 48).translate([0, 0, -0.02]);
+  const countersink = params.style === "countersunk"
+    ? module.Manifold.cylinder(params.countersinkDepth + 0.02, params.holeDiameter / 2, params.countersinkDiameter / 2, 48).translate([0, 0, params.thickness - params.countersinkDepth])
+    : undefined;
+  try {
+    return buildModel(module.Manifold.difference(countersink ? [outer, hole, countersink] : [outer, hole]), [
+      params.style === "countersunk" ? "The top face has a conical recess for a countersunk screw head." : "This is a flat washer with parallel faces.",
+    ]);
+  } finally {
+    outer.delete();
+    hole.delete();
+    countersink?.delete();
+  }
+}
+
+export async function createCableGrommet(input: unknown): Promise<GeneratedModel> {
+  const params: CableGrommetParams = cableGrommetParamsSchema.parse(input);
+  const module = await getManifold();
+  const sleeve = module.Manifold.cylinder(params.deskThickness, params.cutoutDiameter / 2, params.cutoutDiameter / 2, 64);
+  const flange = module.Manifold.cylinder(params.flangeThickness, params.flangeDiameter / 2, params.flangeDiameter / 2, 64).translate([0, 0, params.deskThickness]);
+  const opening = module.Manifold.cylinder(params.deskThickness + params.flangeThickness + 0.04, params.openingDiameter / 2, params.openingDiameter / 2, 64).translate([0, 0, -0.02]);
+  try {
+    return buildModel(module.Manifold.difference([module.Manifold.union([sleeve, flange]), opening]), ["Insert the sleeve into a desk cutout; the flange sits on top and keeps cables neatly routed."]);
+  } finally {
+    sleeve.delete();
+    flange.delete();
+    opening.delete();
+  }
+}
+
+export async function createScrewCover(input: unknown): Promise<GeneratedModel> {
+  const params: ScrewCoverParams = screwCoverParamsSchema.parse(input);
+  const module = await getManifold();
+  const outerDiameter = params.screwHeadDiameter + params.clearance * 2 + params.wallThickness * 2;
+  const height = params.screwHeadHeight + params.topThickness;
+  const outer = module.Manifold.cylinder(height, outerDiameter / 2, outerDiameter / 2, 48);
+  const cavity = module.Manifold.cylinder(params.screwHeadHeight + 0.04, (params.screwHeadDiameter + params.clearance * 2) / 2, (params.screwHeadDiameter + params.clearance * 2) / 2, 48).translate([0, 0, -0.02]);
+  try {
+    return buildModel(module.Manifold.difference([outer, cavity]), ["Press the cover over a screw head to protect it and create a clean finished surface."]);
+  } finally {
+    outer.delete();
+    cavity.delete();
+  }
+}
+
+function evenlySpaced(count: number, width: number) {
+  return Array.from({ length: count }, (_, index) => count === 1 ? 0 : -width * 0.3 + (index / (count - 1)) * width * 0.6);
+}
+
+export async function createLBracket(input: unknown): Promise<GeneratedModel> {
+  const params: LBracketParams = lBracketParamsSchema.parse(input);
+  const module = await getManifold();
+  const horizontal = cuboid(module, params.width, params.horizontalLength, params.thickness, 0, params.horizontalLength / 2 - params.thickness / 2);
+  const vertical = cuboid(module, params.width, params.thickness, params.verticalLength, 0, params.thickness / 2, params.verticalLength / 2);
+  const horizontalHoleY = params.horizontalLength - params.thickness - params.edgeOffset;
+  const verticalHoleZ = params.verticalLength - params.edgeOffset;
+  const horizontalHoles = evenlySpaced(params.horizontalHoleCount, params.width).map((x) => module.Manifold.cylinder(params.thickness + 0.04, params.holeDiameter / 2, params.holeDiameter / 2, 32).translate([x, horizontalHoleY, -0.02]));
+  const verticalHoles = evenlySpaced(params.verticalHoleCount, params.width).map((x) => module.Manifold.cylinder(params.thickness + 0.04, params.holeDiameter / 2, params.holeDiameter / 2, 32).rotate([90, 0, 0]).translate([x, params.thickness + 0.02, verticalHoleZ]));
+  try {
+    const body = module.Manifold.union([horizontal, vertical]);
+    try {
+      return buildModel(module.Manifold.difference([body, ...horizontalHoles, ...verticalHoles]), ["Mount through both legs of the bracket for a strong right-angle joint."], params.horizontalHoleCount + params.verticalHoleCount);
+    } finally {
+      body.delete();
+    }
+  } finally {
+    horizontal.delete();
+    vertical.delete();
+    horizontalHoles.forEach((hole) => hole.delete());
+    verticalHoles.forEach((hole) => hole.delete());
   }
 }

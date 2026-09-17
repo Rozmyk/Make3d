@@ -1,6 +1,6 @@
-import { cableClipDefaults, cableDeskOrganizerDefaults, cableGuideDefaults, pegboardShelfDefaults, phoneStandDefaults, storageBoxDefaults, underDeskHolderDefaults } from "@make3d/validation";
+import { cableClipDefaults, cableDeskOrganizerDefaults, cableGuideDefaults, cableGrommetDefaults, lBracketDefaults, pegboardShelfDefaults, phoneStandDefaults, screwCoverDefaults, spacerDefaults, storageBoxDefaults, underDeskHolderDefaults, washerDefaults } from "@make3d/validation";
 import { describe, expect, it } from "vitest";
-import { createCableClip, createCableDeskOrganizer, createCableGuide, createPegboardShelf, createPhoneStand, createStorageBox, createUnderDeskHolder } from "../src/index.js";
+import { createCableClip, createCableDeskOrganizer, createCableGuide, createCableGrommet, createLBracket, createPegboardShelf, createPhoneStand, createScrewCover, createSpacer, createStorageBox, createUnderDeskHolder, createWasher } from "../src/index.js";
 
 describe("basic printable models", () => {
   it("creates a phone stand with a valid mesh", async () => {
@@ -67,5 +67,36 @@ describe("basic printable models", () => {
       (await createUnderDeskHolder({ ...underDeskHolderDefaults, screwCount })).metadata.volumeMm3,
     ));
     expect(new Set(volumes.map((volume) => volume.toFixed(3))).size).toBe(volumes.length);
+  });
+
+  it("creates an editable spacer with an optional hole and flange", async () => {
+    const solid = await createSpacer({ ...spacerDefaults, holeDiameter: 0 });
+    const flanged = await createSpacer({ ...spacerDefaults, flangeDiameter: 28, flangeHeight: 3 });
+    expect(flanged.metadata.boundingBox.width).toBeCloseTo(28, 3);
+    expect(flanged.metadata.boundingBox.height).toBeCloseTo(spacerDefaults.height, 3);
+    expect(flanged.metadata.volumeMm3).toBeGreaterThan(solid.metadata.volumeMm3);
+    expect(flanged.mesh.indices.every((index) => index < flanged.mesh.positions.length / 3)).toBe(true);
+  });
+
+  it("creates flat and countersunk washer profiles", async () => {
+    const flat = await createWasher(washerDefaults);
+    const countersunk = await createWasher({ ...washerDefaults, style: "countersunk" });
+    expect(flat.metadata.boundingBox.height).toBeCloseTo(washerDefaults.thickness, 3);
+    expect(countersunk.metadata.volumeMm3).toBeLessThan(flat.metadata.volumeMm3);
+    expect(countersunk.mesh.indices.every((index) => index < countersunk.mesh.positions.length / 3)).toBe(true);
+  });
+
+  it("creates configurable grommet, screw cover and L-bracket models", async () => {
+    const [grommet, cover, bracket] = await Promise.all([
+      createCableGrommet(cableGrommetDefaults),
+      createScrewCover(screwCoverDefaults),
+      createLBracket(lBracketDefaults),
+    ]);
+    expect(grommet.metadata.boundingBox.height).toBeCloseTo(cableGrommetDefaults.deskThickness + cableGrommetDefaults.flangeThickness, 3);
+    expect(cover.metadata.boundingBox.height).toBeCloseTo(screwCoverDefaults.screwHeadHeight + screwCoverDefaults.topThickness, 3);
+    expect(bracket.metadata.boundingBox.height).toBeCloseTo(lBracketDefaults.verticalLength, 3);
+    expect(bracket.metadata.boundingBox.depth).toBeLessThanOrEqual(lBracketDefaults.horizontalLength);
+    expect(bracket.metadata.compartmentCount).toBe(lBracketDefaults.horizontalHoleCount + lBracketDefaults.verticalHoleCount);
+    for (const model of [grommet, cover, bracket]) expect(model.metadata.volumeMm3).toBeGreaterThan(0);
   });
 });

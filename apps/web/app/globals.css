@@ -1486,6 +1486,9 @@ button.categoryCard:active { transform: translateY(1px); }
 .categoryGrid > :nth-child(2) .categoryGlyph { color: var(--category-green); }
 .categoryGrid > :nth-child(3) .categoryGlyph { color: var(--category-amber); }
 .categoryGrid > :nth-child(4) .categoryGlyph { color: var(--category-blue); }
+.categoryGrid > :nth-child(5) .categoryGlyph { color: var(--category-blue); }
+.categoryGrid > :nth-child(6) .categoryGlyph { color: var(--category-violet); }
+.categoryGrid > :nth-child(7) .categoryGlyph { color: var(--category-amber); }
 .categoryCard .projectCardMeta,
 .categoryCard .projectCardAction { display: none; }
 .categoryCard strong { margin-top: auto; color: var(--color-ink); font-size: 1.2rem; }
