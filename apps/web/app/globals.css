@@ -190,6 +190,13 @@
 /* The editor is a work surface: subdued grid first, then one readable model colour. */
 .projectsHome{--color-canvas:var(--maker-canvas);--color-grid:var(--maker-rule);--color-grid-strong:var(--maker-rule-strong);--color-model:var(--maker-blue-deep);--color-model-3d:var(--maker-blue-deep)}
 
+/* Editors deserve a broader work surface; export belongs next to the resulting preview. */
+.workbench .floatingNav,.workbenchIdentity,.workbench .editor,.workbench .inspector{width:min(100%,100rem)}
+.viewerExport{min-height:2.45rem;padding:0 var(--maker-space-4);border:1px solid var(--maker-blue-deep);border-radius:.6rem;background:var(--maker-blue-deep);color:var(--maker-panel);font-size:.78rem;font-weight:650;white-space:nowrap}.viewerExport:hover:not(:disabled){background:var(--maker-blue);border-color:var(--maker-blue)}.viewerExport:disabled{cursor:not-allowed;opacity:.5}
+@media(max-width:39.99rem){.viewerActions{flex-wrap:wrap;justify-content:flex-end}.viewerExport{min-height:2.25rem}}
+
+.workbench .parameterDetails{padding-inline:clamp(var(--maker-space-5),2vw,var(--maker-space-6))}
+
 
 
 /* The library index is navigation: each whole row is the control. */

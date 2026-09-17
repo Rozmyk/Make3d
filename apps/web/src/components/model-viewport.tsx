@@ -30,7 +30,7 @@ function Mesh({ model, wireframe, color }: { model: GeneratedModel; wireframe: b
     return next;
   }, [model]);
   useEffect(() => () => geometry.dispose(), [geometry]);
-  return <mesh geometry={geometry}><meshStandardMaterial color={color} roughness={0.66} metalness={0} wireframe={wireframe} /></mesh>;
+  return <mesh geometry={geometry}><meshStandardMaterial color={color} roughness={0.74} metalness={0} wireframe={wireframe} /></mesh>;
 }
 
 function CameraFit({ model, resetToken, interactive, compact, fitScale, autoRotate }: { model: GeneratedModel; resetToken: number; interactive: boolean; compact: boolean; fitScale: number; autoRotate: boolean }) {
@@ -71,5 +71,5 @@ export function ModelViewport({ model, wireframe, resetToken, compact = false, t
   }, []);
   if (!colors) return <div className={`canvasWrap ${compact ? "canvasWrap--thumbnail" : ""}`} />;
   const shouldRotate = autoRotate && !reduceMotion;
-  return <div className={`canvasWrap ${compact ? "canvasWrap--thumbnail" : ""}`}><Canvas gl={{ alpha: transparent }} dpr={compact ? [1, 1.5] : [1, 2]} frameloop={shouldRotate || !compact ? "always" : "demand"} camera={{ position: [120, 100, 120], fov: compact ? 34 : 38 }}>{!transparent && <color attach="background" args={[colors.canvas]} />}<ambientLight intensity={1.05} /><directionalLight position={[100, 160, 80]} intensity={1.15} /><directionalLight position={[-80, 70, -120]} intensity={0.55} />{!compact && <Grid args={[400, 400]} position={[0, -0.25, 0]} cellSize={10} cellThickness={0.6} sectionSize={50} sectionThickness={1.1} cellColor={colors.grid} sectionColor={colors.gridStrong} fadeDistance={450} />}{model ? <><Mesh model={model} wireframe={wireframe} color={colors.model} /><CameraFit model={model} resetToken={resetToken} interactive={!compact} compact={compact} fitScale={fitScale} autoRotate={shouldRotate} /></> : null}</Canvas></div>;
+  return <div className={`canvasWrap ${compact ? "canvasWrap--thumbnail" : ""}`}><Canvas gl={{ alpha: transparent }} dpr={compact ? [1, 1.5] : [1, 2]} frameloop={shouldRotate || !compact ? "always" : "demand"} camera={{ position: [120, 100, 120], fov: compact ? 34 : 38 }}>{!transparent && <color attach="background" args={[colors.canvas]} />}<ambientLight intensity={0.86} /><directionalLight position={[100, 160, 80]} intensity={1.02} /><directionalLight position={[-80, 70, -120]} intensity={0.16} />{!compact && <Grid args={[400, 400]} position={[0, -0.25, 0]} cellSize={10} cellThickness={0.6} sectionSize={50} sectionThickness={1.1} cellColor={colors.grid} sectionColor={colors.gridStrong} fadeDistance={450} />}{model ? <><Mesh model={model} wireframe={wireframe} color={colors.model} /><CameraFit model={model} resetToken={resetToken} interactive={!compact} compact={compact} fitScale={fitScale} autoRotate={shouldRotate} /></> : null}</Canvas></div>;
 }
