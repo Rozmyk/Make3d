@@ -43,7 +43,7 @@ function ModelThumbnail({ type, params, label, transparent = false, fitScale, au
 
 function ModelCard({ href, badge, type, params, title, description, detail }: { href: string; badge: string; type: GeneratorType; params: unknown; title: string; description: string; detail: string }) {
   return <a className="projectCard projectCard--technical modelCard" href={href}>
-    <div className="modelCardStage"><span className="modelCardBadge">{badge}</span><ModelThumbnail type={type} params={params} label={title} transparent modelColorToken="--maker-blue-deep" /></div>
+    <div className="modelCardStage"><span className="modelCardBadge">{badge}</span><ModelThumbnail type={type} params={params} label={title} transparent modelColorToken="--color-model-3d" /></div>
     <div className="modelCardCaption"><strong>{title}</strong><span className="modelCardDescription">{description}</span><span className="modelCardMeta">{detail}</span></div>
   </a>;
 }
