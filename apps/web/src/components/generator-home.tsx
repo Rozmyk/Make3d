@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import type { GeneratedModel, GeneratorType } from "@make3d/types";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { organizerPresets } from "../organizer-presets";
 import { simpleModelSpecs } from "../model-specs";
 import { ModelViewport } from "./model-viewport";
@@ -86,7 +86,31 @@ function LandingLibrary({ onBrowse, onSelect }: { onBrowse: () => void; onSelect
 }
 
 function Contact() {
-  return <section className="contactPage" aria-labelledby="contact-title"><p>Contact</p><h1 id="contact-title">Need a part<br />we do not have?</h1><p>Describe what you are trying to fit, mount or organise. A GitHub issue is the best place to request a model or report a problem.</p><div><a className="contactPrimary" href="https://github.com/Rozmyk/Make3d/issues/new" target="_blank" rel="noreferrer">Request a model <span aria-hidden="true">↗</span></a><a className="contactSecondary" href="https://github.com/Rozmyk/Make3d" target="_blank" rel="noreferrer">Open GitHub <span aria-hidden="true">↗</span></a></div></section>;
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const request = String(form.get("request"));
+    const subject = String(form.get("subject"));
+    const name = String(form.get("name"));
+    const email = String(form.get("email"));
+    const message = String(form.get("message"));
+    const query = new URLSearchParams({ title: `[${request}] ${subject}`, body: `Name: ${name}\nEmail: ${email}\nRequest: ${request}\n\n${message}` });
+    window.location.assign(`https://github.com/Rozmyk/Make3d/issues/new?${query}`);
+  };
+
+  return <section className="contactPage" aria-labelledby="contact-title">
+    <div className="contactIntro"><p>Contact</p><h1 id="contact-title">Tell us what<br />you need.</h1><p>Describe the part, the object it needs to fit and any important dimensions. We will turn your request into a GitHub issue.</p></div>
+    <form className="contactForm" onSubmit={submit}>
+      <div className="contactFieldGrid">
+        <label className="contactField"><span>Your name</span><input name="name" autoComplete="name" required /></label>
+        <label className="contactField"><span>Email</span><input name="email" type="email" autoComplete="email" required /></label>
+        <label className="contactField contactField--wide"><span>What can we help with?</span><select name="request" defaultValue="Model request"><option>Model request</option><option>Problem report</option><option>General feedback</option></select></label>
+        <label className="contactField contactField--wide"><span>Short title</span><input name="subject" placeholder="e.g. Wall mount for a router" required /></label>
+        <label className="contactField contactField--wide"><span>Tell us about it</span><textarea name="message" placeholder="Include the item, key dimensions and how you plan to use the part." rows={6} required /></label>
+      </div>
+      <div className="contactFormFooter"><p>Submitting opens a pre-filled GitHub issue.</p><button className="contactPrimary" type="submit">Continue to GitHub <span aria-hidden="true">↗</span></button></div>
+    </form>
+  </section>;
 }
 
 function Landing({ onBrowse, onSelect, onContact }: { onBrowse: () => void; onSelect: (view: HomeView) => void; onContact: () => void }) {
