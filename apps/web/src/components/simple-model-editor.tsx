@@ -3,6 +3,7 @@
 import { exportBinaryStl } from "@make3d/geometry/stl";
 import type { GeneratedModel, GeneratorType } from "@make3d/types";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ErrorToast } from "./error-toast";
 import { ModelViewport } from "./model-viewport";
 
 type WorkerResponse = { id: number; model?: GeneratedModel; error?: string };
@@ -67,10 +68,11 @@ export function SimpleModelEditor({ spec }: { spec: SimpleModelSpec }) {
     <section className="editor" aria-label={`${spec.title} editor`}>
       <aside className="parameters"><div className="parameterDetails"><div className="panelHeading"><span>Model settings</span><span className="unitLabel">mm</span></div>
         {spec.groups.map((group) => <section className="parameterGroup" key={group.label}><h2>{group.label}</h2><div className="fieldList">{group.fields.map((field) => field.type === "toggle" ? <label className="toggle" key={field.key}><input type="checkbox" checked={Boolean(params[field.key])} onChange={(event) => update(field.key, event.target.checked)} /><span>{field.label}</span></label> : field.type === "select" ? <label className="field" key={field.key}><span>{field.label}</span><div className="inputWrap"><select aria-label={field.label} value={String(params[field.key])} onChange={(event) => update(field.key, event.target.value)}>{field.options?.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></div></label> : <label className="field" key={field.key}><span>{field.label}</span><div className="inputWrap"><input aria-label={field.label} type="number" value={String(params[field.key])} step={field.step ?? 1} onChange={(event) => update(field.key, Number(event.target.value))} /><span>mm</span></div></label>)}</div></section>)}
-        {error && <p className="error parameterError" role="alert">{error}</p>}</div>
+        </div>
       </aside>
       <div className="viewerPanel"><div className="viewerToolbar"><div><span className="viewLabel">Live preview</span><p>Drag to orbit · scroll to zoom</p></div><div className="viewerActions"><button className="reset" onClick={() => setResetView((value) => value + 1)}>Reset view</button><label className="wireframe"><input type="checkbox" checked={wireframe} onChange={(event) => setWireframe(event.target.checked)} /> Wireframe</label><button className="viewerExport" disabled={!model} onClick={download}>Export STL <span aria-hidden="true">↓</span></button></div></div><ModelViewport model={model} wireframe={wireframe} resetToken={resetView} /></div>
     </section>
     <footer className="inspector">{model ? <><span><b>Size</b> {model.metadata.boundingBox.width.toFixed(1)} × {model.metadata.boundingBox.depth.toFixed(1)} × {model.metadata.boundingBox.height.toFixed(1)} mm</span><span><b>Parts</b> {model.metadata.compartmentCount}</span><span><b>Material</b> {(model.metadata.volumeMm3 / 1000).toFixed(1)} cm³</span><span><b>Mesh</b> {model.metadata.triangleCount.toLocaleString()} triangles</span></> : <span>Preparing your model…</span>}</footer>
+    <ErrorToast message={error} />
   </main>;
 }

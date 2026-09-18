@@ -6,6 +6,7 @@ import { organizerDefaults } from "@make3d/validation";
 import { useCallback, useState } from "react";
 import { useOrganizerModel } from "../hooks/use-organizer-model";
 import { organizerEditorInitialParams } from "../organizer-presets";
+import { ErrorToast } from "./error-toast";
 import { ModelViewport } from "./model-viewport";
 
 type NumericField = { key: keyof OrganizerParams; label: string; unit?: string; step: number };
@@ -37,9 +38,10 @@ export function OrganizerEditor({ initialParams = organizerDefaults }: { initial
     <section className="editor" aria-label="Organizer editor">
       <aside className="parameters"><div className="parameterDetails"><div className="panelHeading"><span>Model settings</span><span className="unitLabel">mm</span></div>
         {parameterGroups.map((group) => <section className="parameterGroup" key={group.label}><h2>{group.label}</h2><div className="fieldList">{group.fields.map((field) => <label className="field" key={field.key}><span>{field.label}</span><div className="inputWrap"><input aria-label={field.label} type="number" value={params[field.key]} step={field.step} onChange={(event) => update(field.key, Number(event.target.value))} /><span>{field.unit}</span></div></label>)}</div></section>)}
-        {error && <p className="error parameterError" role="alert">{error}</p>}</div></aside>
+        </div></aside>
       <div className="viewerPanel"><div className="viewerToolbar"><div><span className="viewLabel">Live preview</span><p>Drag to orbit · scroll to zoom</p></div><div className="viewerActions"><button className="reset" onClick={() => setResetView((value) => value + 1)}>Reset view</button><label className="wireframe"><input type="checkbox" checked={wireframe} onChange={(event) => setWireframe(event.target.checked)} /> Wireframe</label><button className="viewerExport" disabled={!model} onClick={download}>Export STL <span aria-hidden="true">↓</span></button></div></div><ModelViewport model={model} wireframe={wireframe} resetToken={resetView} /></div>
     </section>
     <footer className="inspector">{model ? <><span><b>Size</b> {model.metadata.boundingBox.width.toFixed(1)} × {model.metadata.boundingBox.depth.toFixed(1)} × {model.metadata.boundingBox.height.toFixed(1)} mm</span><span><b>Compartments</b> {model.metadata.compartmentCount}</span><span><b>Material</b> {(model.metadata.volumeMm3 / 1000).toFixed(1)} cm³</span><span><b>Mesh</b> {model.metadata.triangleCount.toLocaleString()} triangles</span></> : <span>Preparing your model…</span>}</footer>
+    <ErrorToast message={error} />
   </main>;
 }
