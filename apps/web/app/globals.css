@@ -180,7 +180,6 @@
 .projectsHome .modelCardStage,.projectsHome .modelCardStage .projectThumbnail--model,.projectsHome .modelCardStage .canvasWrap{background:var(--maker-surface)}
 
 /* The landing invitation needs one decisive next step, followed by a single practical reassurance. */
-.projectsHome .landingHeroProof{max-width:31ch;margin:var(--maker-space-5) 0 0;padding-top:var(--maker-space-4);border-top:1px solid var(--maker-rule);color:var(--maker-muted);font-size:.82rem;line-height:1.55}
 .projectsHome .landingHero h1{color:var(--maker-blue-deep)}
 
 /* A low, diffuse contact shadow gives the free-floating preview weight without adding a backdrop. */

@@ -94,7 +94,7 @@ function Landing({ onBrowse, onSelect, onContact }: { onBrowse: () => void; onSe
   const ctaReveal = reduceMotion ? {} : { initial: { opacity: 0, y: 18 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, amount: 0.22 }, transition: { duration: 0.6, ease: premiumEase } };
   return <>
     <section className="landingHero" aria-labelledby="landing-title">
-      <div className="landingHeroCopy"><h1 id="landing-title">Make the part<br />you need.</h1><p>Choose a tested starting point, fit it to your setup and download a ready-to-print STL.</p><div className="landingHeroActions"><button className="landingPrimary" onClick={onBrowse}>Choose a model <span aria-hidden="true">→</span></button><a className="landingSecondary" href="#how-it-works">See how it works <span aria-hidden="true">↓</span></a></div><p className="landingHeroProof">No account needed. Adjust dimensions in your browser, then export an STL.</p></div>
+      <div className="landingHeroCopy"><h1 id="landing-title">Make the part<br />you need.</h1><p>Choose a tested starting point, fit it to your setup and download a ready-to-print STL.</p><div className="landingHeroActions"><button className="landingPrimary" onClick={onBrowse}>Choose a model <span aria-hidden="true">→</span></button><a className="landingSecondary" href="#how-it-works">See how it works <span aria-hidden="true">↓</span></a></div></div>
       <div className="landingHeroVisual" aria-label="Editable organizer preview"><ModelThumbnail type="organizer" params={organizerPresets[0].params} label="Custom organizer" transparent fitScale={1.12} autoRotate modelColorToken="--maker-model" /></div>
     </section>
     <LandingLibrary onBrowse={onBrowse} onSelect={onSelect} />
