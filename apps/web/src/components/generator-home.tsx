@@ -140,6 +140,7 @@ function Landing({ onBrowse, onSelect, onContact }: { onBrowse: () => void; onSe
 export function GeneratorHome({ initialView = "landing" }: { initialView?: HomeView }) {
   const [view, setView] = useState<HomeView>(initialView);
   const [isMobileNavOpen, setMobileNavOpen] = useState(false);
+  const [isScrolled, setScrolled] = useState(false);
   const reduceMotion = useReducedMotion();
   const enter = (_delay = 0) => ({ initial: false });
   const cardMotion = (_index: number) => reduceMotion ? {} : {
@@ -153,6 +154,13 @@ export function GeneratorHome({ initialView = "landing" }: { initialView?: HomeV
     return () => window.removeEventListener("popstate", syncView);
   }, []);
 
+  useEffect(() => {
+    const updateScrollState = () => setScrolled(window.scrollY > 16);
+    updateScrollState();
+    window.addEventListener("scroll", updateScrollState, { passive: true });
+    return () => window.removeEventListener("scroll", updateScrollState);
+  }, []);
+
   const navigate = (nextView: HomeView) => {
     setView(nextView);
     setMobileNavOpen(false);
@@ -163,7 +171,7 @@ export function GeneratorHome({ initialView = "landing" }: { initialView?: HomeV
   const isLibraryView = view === "categories" || view === "organizers" || view === "cable-management" || view === "desk-mounts" || view === "mounting" || view === "pegboard" || view === "spacers" || view === "washers";
 
   return <motion.main className="projectsHome" {...enter()}>
-    <header className="consoleHeader"><motion.nav className="floatingNav" aria-label="Main navigation" {...enter(0.08)}><button className="brand brandButton" onClick={() => navigate("landing")} aria-label="Make3D home"><img className="brandLogo" src="/make3d-logo.svg" alt="Make3D" /></button><div className={`navLinks${isMobileNavOpen ? " is-open" : ""}`} id="main-navigation"><button className={`navLink${isLibraryView ? " is-active" : ""}`} onClick={() => navigate("categories")} aria-current={isLibraryView ? "page" : undefined}>{isLibraryView && <motion.span className="navActiveShape" layoutId="active-navigation" transition={{ type: "spring", stiffness: 420, damping: 34 }} />}<span>Library</span></button><a className="navLink" href="https://github.com/Rozmyk/Make3d" target="_blank" rel="noreferrer"><span>GitHub</span> <b aria-hidden="true">↗</b></a><button className={`navLink navLink--contact${view === "contact" ? " is-active" : ""}`} onClick={() => navigate("contact")} aria-current={view === "contact" ? "page" : undefined}>{view === "contact" && <motion.span className="navActiveShape" layoutId="active-navigation" transition={{ type: "spring", stiffness: 420, damping: 34 }} />}<span>Contact</span></button></div><button className="mobileNavToggle" type="button" aria-controls="main-navigation" aria-expanded={isMobileNavOpen} onClick={() => setMobileNavOpen((open) => !open)}><span className="srOnly">{isMobileNavOpen ? "Close navigation" : "Open navigation"}</span><i /><i /></button></motion.nav></header>
+    <header className={`consoleHeader${isScrolled ? " is-scrolled" : ""}`}><motion.nav className="floatingNav" aria-label="Main navigation" {...enter(0.08)}><button className="brand brandButton" onClick={() => navigate("landing")} aria-label="Make3D home"><img className="brandLogo" src="/make3d-logo.svg" alt="Make3D" /></button><div className={`navLinks${isMobileNavOpen ? " is-open" : ""}`} id="main-navigation"><button className={`navLink${isLibraryView ? " is-active" : ""}`} onClick={() => navigate("categories")} aria-current={isLibraryView ? "page" : undefined}>{isLibraryView && <motion.span className="navActiveShape" layoutId="active-navigation" transition={{ type: "spring", stiffness: 420, damping: 34 }} />}<span>Library</span></button><a className="navLink" href="https://github.com/Rozmyk/Make3d" target="_blank" rel="noreferrer"><span>GitHub</span> <b aria-hidden="true">↗</b></a><button className={`navLink navLink--contact${view === "contact" ? " is-active" : ""}`} onClick={() => navigate("contact")} aria-current={view === "contact" ? "page" : undefined}>{view === "contact" && <motion.span className="navActiveShape" layoutId="active-navigation" transition={{ type: "spring", stiffness: 420, damping: 34 }} />}<span>Contact</span></button></div><button className="mobileNavToggle" type="button" aria-controls="main-navigation" aria-expanded={isMobileNavOpen} onClick={() => setMobileNavOpen((open) => !open)}><span className="srOnly">{isMobileNavOpen ? "Close navigation" : "Open navigation"}</span><i /><i /></button></motion.nav></header>
     {view === "landing" ? <Landing onBrowse={() => navigate("categories")} onSelect={navigate} onContact={() => navigate("contact")} /> : view === "contact" ? <Contact /> : view === "categories" ? <>
       <motion.section className="projectsCatalogue projectsCatalogue--home" aria-labelledby="categories-title" {...enter(0.15)}>
         <div className="catalogueHead"><div><h1 id="categories-title">Choose a category.</h1><p>Start with a tested component, adjust its dimensions and export an STL when it is ready.</p></div></div>
