@@ -12,6 +12,12 @@ enum ProjectVisibility {
   PUBLIC
 }
 
+enum ContactRequestType {
+  MODEL_REQUEST
+  PROBLEM_REPORT
+  GENERAL_FEEDBACK
+}
+
 model User {
   id           String    @id @default(cuid())
   email        String    @unique
@@ -46,4 +52,17 @@ model Project {
   updatedAt        DateTime          @updatedAt
 
   @@index([userId, updatedAt])
+}
+
+model ContactRequest {
+  id                String             @id @default(cuid())
+  requestType       ContactRequestType
+  nameCiphertext    String
+  emailCiphertext   String
+  subjectCiphertext String
+  messageCiphertext String             @db.Text
+  ipHash            String
+  createdAt         DateTime           @default(now())
+
+  @@index([ipHash, createdAt])
 }

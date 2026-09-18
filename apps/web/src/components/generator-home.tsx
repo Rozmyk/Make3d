@@ -86,29 +86,32 @@ function LandingLibrary({ onBrowse, onSelect }: { onBrowse: () => void; onSelect
 }
 
 function Contact() {
+  const [status, setStatus] = useState<{ type: "error" | "success"; message: string }>();
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const request = String(form.get("request"));
-    const subject = String(form.get("subject"));
-    const name = String(form.get("name"));
-    const email = String(form.get("email"));
-    const message = String(form.get("message"));
-    const query = new URLSearchParams({ title: `[${request}] ${subject}`, body: `Name: ${name}\nEmail: ${email}\nRequest: ${request}\n\n${message}` });
-    window.location.assign(`https://github.com/Rozmyk/Make3d/issues/new?${query}`);
+    const form = event.currentTarget;
+    const fields = new FormData(form);
+    setStatus(undefined);
+    void fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"}/contact`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: fields.get("name"), email: fields.get("email"), requestType: fields.get("request"), subject: fields.get("subject"), message: fields.get("message"), website: fields.get("website") }) })
+      .then(async (response) => {
+        if (!response.ok) throw new Error((await response.json().catch(() => null))?.message ?? "We could not send your request.");
+        form.reset();
+        setStatus({ type: "success", message: "Thanks — your request has been received." });
+      })
+      .catch((error: unknown) => setStatus({ type: "error", message: error instanceof Error ? error.message : "We could not send your request." }));
   };
 
   return <section className="contactPage" aria-labelledby="contact-title">
-    <div className="contactIntro"><p>Contact</p><h1 id="contact-title">Tell us what<br />you need.</h1><p>Describe the part, the object it needs to fit and any important dimensions. We will turn your request into a GitHub issue.</p></div>
+    <div className="contactIntro"><p>Contact</p><h1 id="contact-title">Tell us what<br />you need.</h1><p>Describe the part, the object it needs to fit and any important dimensions. Your request stays private.</p></div>
     <form className="contactForm" onSubmit={submit}>
       <div className="contactFieldGrid">
         <label className="contactField"><span>Your name</span><input name="name" autoComplete="name" required /></label>
         <label className="contactField"><span>Email</span><input name="email" type="email" autoComplete="email" required /></label>
-        <label className="contactField contactField--wide"><span>What can we help with?</span><select name="request" defaultValue="Model request"><option>Model request</option><option>Problem report</option><option>General feedback</option></select></label>
+        <label className="contactField contactField--wide"><span>What can we help with?</span><select name="request" defaultValue="MODEL_REQUEST"><option value="MODEL_REQUEST">Model request</option><option value="PROBLEM_REPORT">Problem report</option><option value="GENERAL_FEEDBACK">General feedback</option></select></label>
         <label className="contactField contactField--wide"><span>Short title</span><input name="subject" placeholder="e.g. Wall mount for a router" required /></label>
         <label className="contactField contactField--wide"><span>Tell us about it</span><textarea name="message" placeholder="Include the item, key dimensions and how you plan to use the part." rows={6} required /></label>
       </div>
-      <div className="contactFormFooter"><p>Submitting opens a pre-filled GitHub issue.</p><button className="contactPrimary" type="submit">Continue to GitHub <span aria-hidden="true">↗</span></button></div>
+      <label className="contactHoneypot" aria-hidden="true">Website<input name="website" tabIndex={-1} autoComplete="off" /></label><div className="contactFormFooter"><p>Your contact details are stored privately and never placed in a URL.</p><button className="contactPrimary" type="submit">Send request <span aria-hidden="true">→</span></button></div>{status && <p className={`contactStatus contactStatus--${status.type}`} role="status">{status.message}</p>}
     </form>
   </section>;
 }
