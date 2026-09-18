@@ -11,6 +11,7 @@ type HomeView = "landing" | "contact" | "categories" | "organizers" | "cable-man
 const premiumEase = [0.16, 1, 0.3, 1] as const;
 
 function viewFromLocation(): HomeView {
+  if (window.location.pathname === "/contact") return "contact";
   const query = new URLSearchParams(window.location.search);
   const category = query.get("category");
   if (category === "organizers" || category === "cable-management" || category === "desk-mounts" || category === "mounting" || category === "pegboard" || category === "spacers" || category === "washers") return category;
@@ -25,6 +26,8 @@ function ModelThumbnail({ type, params, label, transparent = false, fitScale, au
   const [error, setError] = useState<string>();
   const worker = useRef<Worker | null>(null);
   useEffect(() => {
+    setError(undefined);
+    setModel(undefined);
     const instance = new Worker(new URL("../geometry.worker.ts", import.meta.url));
     worker.current = instance;
     instance.onmessage = ({ data }: MessageEvent<WorkerResponse>) => {
@@ -35,7 +38,8 @@ function ModelThumbnail({ type, params, label, transparent = false, fitScale, au
     return () => instance.terminate();
   }, [params, type]);
   return <div className="projectThumbnail projectThumbnail--model" aria-label={`3D preview: ${label}`}>
-    {!model && <div className="renderLoading" aria-hidden="true"><span /><small>{error ? "Preview unavailable" : "Preparing preview"}</small></div>}
+    {!model && <div className="modelFallback" aria-hidden="true" />}
+    {!model && <div className="renderLoading" aria-hidden="true">{error ? <small>3D preview unavailable</small> : <><span /><small>Preparing preview</small></>}</div>}
     <ModelViewport model={model} wireframe={false} resetToken={0} compact transparent={transparent} fitScale={fitScale} autoRotate={autoRotate} modelColorToken={modelColorToken} />
     <span className="srOnly" role="status">{error ? `Preview unavailable: ${error}` : model ? `${label} preview ready` : `Preparing ${label} preview`}</span>
   </div>;
@@ -87,23 +91,27 @@ function LandingLibrary({ onBrowse, onSelect }: { onBrowse: () => void; onSelect
 
 function Contact() {
   const [status, setStatus] = useState<{ type: "error" | "success"; message: string }>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (isSubmitting) return;
     const form = event.currentTarget;
     const fields = new FormData(form);
     setStatus(undefined);
+    setIsSubmitting(true);
     void fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"}/contact`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: fields.get("name"), email: fields.get("email"), requestType: fields.get("request"), subject: fields.get("subject"), message: fields.get("message"), website: fields.get("website") }) })
       .then(async (response) => {
         if (!response.ok) throw new Error((await response.json().catch(() => null))?.message ?? "We could not send your request.");
         form.reset();
         setStatus({ type: "success", message: "Thanks — your request has been received." });
       })
-      .catch((error: unknown) => setStatus({ type: "error", message: error instanceof Error ? error.message : "We could not send your request." }));
+      .catch((error: unknown) => setStatus({ type: "error", message: error instanceof Error ? error.message : "We could not send your request." }))
+      .finally(() => setIsSubmitting(false));
   };
 
   return <section className="contactPage" aria-labelledby="contact-title">
     <div className="contactIntro"><p>Contact</p><h1 id="contact-title">Tell us what<br />you need.</h1><p>Describe the part, the object it needs to fit and any important dimensions. Your request stays private.</p></div>
-    <form className="contactForm" onSubmit={submit}>
+    <form className="contactForm" onSubmit={submit} aria-busy={isSubmitting}>
       <div className="contactFieldGrid">
         <label className="contactField"><span>Your name</span><input name="name" autoComplete="name" required /></label>
         <label className="contactField"><span>Email</span><input name="email" type="email" autoComplete="email" required /></label>
@@ -111,7 +119,7 @@ function Contact() {
         <label className="contactField contactField--wide"><span>Short title</span><input name="subject" placeholder="e.g. Wall mount for a router" required /></label>
         <label className="contactField contactField--wide"><span>Tell us about it</span><textarea name="message" placeholder="Include the item, key dimensions and how you plan to use the part." rows={6} required /></label>
       </div>
-      <label className="contactHoneypot" aria-hidden="true">Website<input name="website" tabIndex={-1} autoComplete="off" /></label><div className="contactFormFooter"><button className="contactPrimary" type="submit">Send request <span aria-hidden="true">→</span></button></div>{status && <p className={`contactStatus contactStatus--${status.type}`} role="status">{status.message}</p>}
+      <label className="contactHoneypot" aria-hidden="true">Website<input name="website" tabIndex={-1} autoComplete="off" /></label><div className="contactFormFooter"><button className="contactPrimary" type="submit" disabled={isSubmitting}>{isSubmitting ? "Sending…" : <>Send request <span aria-hidden="true">→</span></>}</button></div>{status && <p className={`contactStatus contactStatus--${status.type}`} role="status">{status.message}</p>}
     </form>
   </section>;
 }
@@ -129,8 +137,8 @@ function Landing({ onBrowse, onSelect, onContact }: { onBrowse: () => void; onSe
   </>;
 }
 
-export function GeneratorHome() {
-  const [view, setView] = useState<HomeView>("landing");
+export function GeneratorHome({ initialView = "landing" }: { initialView?: HomeView }) {
+  const [view, setView] = useState<HomeView>(initialView);
   const reduceMotion = useReducedMotion();
   const enter = (_delay = 0) => ({ initial: false });
   const cardMotion = (_index: number) => reduceMotion ? {} : {
@@ -146,7 +154,7 @@ export function GeneratorHome() {
 
   const navigate = (nextView: HomeView) => {
     setView(nextView);
-    const url = nextView === "landing" ? window.location.pathname : nextView === "categories" ? `${window.location.pathname}?view=library` : nextView === "contact" ? `${window.location.pathname}?view=contact` : `${window.location.pathname}?category=${nextView}`;
+    const url = nextView === "contact" ? "/contact" : nextView === "landing" ? "/" : nextView === "categories" ? "/?view=library" : `/?category=${nextView}`;
     window.history.pushState({}, "", url);
   };
 
