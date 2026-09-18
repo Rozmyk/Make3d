@@ -111,7 +111,7 @@ function Contact() {
         <label className="contactField contactField--wide"><span>Short title</span><input name="subject" placeholder="e.g. Wall mount for a router" required /></label>
         <label className="contactField contactField--wide"><span>Tell us about it</span><textarea name="message" placeholder="Include the item, key dimensions and how you plan to use the part." rows={6} required /></label>
       </div>
-      <label className="contactHoneypot" aria-hidden="true">Website<input name="website" tabIndex={-1} autoComplete="off" /></label><div className="contactFormFooter"><p>Your contact details are stored privately and never placed in a URL.</p><button className="contactPrimary" type="submit">Send request <span aria-hidden="true">→</span></button></div>{status && <p className={`contactStatus contactStatus--${status.type}`} role="status">{status.message}</p>}
+      <label className="contactHoneypot" aria-hidden="true">Website<input name="website" tabIndex={-1} autoComplete="off" /></label><div className="contactFormFooter"><button className="contactPrimary" type="submit">Send request <span aria-hidden="true">→</span></button></div>{status && <p className={`contactStatus contactStatus--${status.type}`} role="status">{status.message}</p>}
     </form>
   </section>;
 }
